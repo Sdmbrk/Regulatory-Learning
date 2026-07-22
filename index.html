@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Regulatory Learning & Certification Portal — Sdmbrk Collections</title>
+<style>
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --ink:#1C2422; --muted:#5F6B67; --line:#DDE4E1;
+  --teal:#0E7C7B; --teal-dk:#0A5B5A; --teal-soft:#E3F1F0;
+  --green:#16A34A; --green-dk:#116B33; --green-soft:#E7F6EC;
+  --red:#C0392B; --red-soft:#FBEAE7;
+  --gold:#C9A227; --amber-soft:#FBF3DC;
+  --r:12px; --sh:0 1px 3px rgba(28,36,34,.08),0 4px 14px rgba(28,36,34,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:var(--ink)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 80px}
+/* header */
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.hbar{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;flex-direction:column;line-height:1.15;cursor:pointer}
+.brand .k{font-size:10px;letter-spacing:.22em;color:var(--teal);font-weight:700}
+.brand .t{font-size:16px;font-weight:700}
+.hspace{flex:1}
+.adm-pill{font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.adm-pill.on{background:var(--teal);border-color:var(--teal);color:#fff}
+/* generic */
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-weight:700;margin:26px 0 6px}
+h1.page{font-size:26px;font-weight:750;letter-spacing:-.01em}
+h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
+.sub{color:var(--muted);font-size:14px;margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--surface);transition:.15s}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.pri:hover{background:var(--teal-dk)}
+.btn.grn{background:var(--green);border-color:var(--green);color:#fff}
+.btn.grn:hover{background:var(--green-dk)}
+.btn.dngr{color:var(--red)}
+.btn.dngr:hover{border-color:var(--red)}
+.btn.dngr.armed{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;width:100%}
+.field textarea{min-height:120px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+/* dashboard cards */
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:14px}
+.catcard{padding:20px;display:flex;flex-direction:column;gap:8px;min-height:170px;position:relative;overflow:hidden;cursor:pointer;transition:.15s}
+.catcard:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(28,36,34,.12)}
+.catcard .cico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--teal-soft)}
+.catcard h3{font-size:17px;font-weight:700}
+.catcard .meta{font-size:12.5px;color:var(--muted);margin-top:auto;display:flex;gap:12px;flex-wrap:wrap}
+.catcard.ph{opacity:.62;cursor:default;border-style:dashed}
+.catcard.ph:hover{transform:none;box-shadow:var(--sh)}
+.tagline{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;letter-spacing:.12em;padding:3px 9px;border-radius:99px}
+.tag-act{background:var(--green-soft);color:var(--green-dk)}
+.tag-ph{background:#EEF1EF;color:var(--muted)}
+.catcard.addnew{border-style:dashed;align-items:center;justify-content:center;color:var(--muted);font-weight:600;opacity:.9}
+.catcard.addnew:hover{color:var(--teal);border-color:var(--teal)}
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:18px 0 18px;overflow-x:auto}
+.tab{padding:10px 16px;font-weight:600;font-size:14px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.on{color:var(--teal);border-color:var(--teal)}
+/* doc list */
+.doclist{display:flex;flex-direction:column;gap:10px}
+.docrow{display:flex;align-items:center;gap:14px;padding:14px 16px}
+.docrow .dico{width:38px;height:38px;border-radius:9px;background:var(--red-soft);color:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0}
+.docrow .dnm{font-weight:600;word-break:break-word}
+.docrow .dsz{font-size:12px;color:var(--muted)}
+.docrow .dsp{flex:1}
+.viewerbox{margin-top:14px}
+.viewerbox iframe{width:100%;height:72vh;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+/* study */
+.studysec{padding:18px 20px;margin-bottom:14px}
+.studysec h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
+.studysec .snum{width:26px;height:26px;border-radius:7px;background:var(--teal);color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notes{margin-top:10px;font-size:14.5px}
+.notes h4{font-size:14px;font-weight:700;margin:14px 0 4px;color:var(--teal-dk)}
+.notes ul{padding-left:20px;margin:6px 0}
+.notes li{margin:3px 0}
+.notes p{margin:6px 0}
+.notes table{border-collapse:collapse;margin:10px 0;width:100%;font-size:13.5px}
+.notes th{background:var(--teal-soft);text-align:left}
+.notes th,.notes td{border:1px solid var(--line);padding:7px 10px}
+.notes img{max-width:100%;border-radius:9px;border:1px solid var(--line);margin:8px 0}
+.notes .warnbox{background:var(--amber-soft);border-left:3px solid var(--gold);padding:9px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:13.5px}
+/* exam */
+.qwrap{max-width:720px;margin:0 auto}
+.qprog{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0}
+.qprog i{display:block;height:100%;background:var(--teal);transition:.3s;border-radius:99px}
+.qcard{padding:24px}
+.qnum{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.qtext{font-size:17px;font-weight:650;margin:8px 0 18px;line-height:1.45}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:9px;cursor:pointer;transition:.12s}
+.opt:hover{border-color:var(--teal)}
+.opt.sel{border-color:var(--teal);background:var(--teal-soft)}
+.opt .ol{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;background:#fff}
+.opt.sel .ol{background:var(--teal);border-color:var(--teal);color:#fff}
+.qnav{display:flex;gap:10px;margin-top:18px;align-items:center}
+.qdots{display:flex;gap:5px;flex-wrap:wrap;margin:14px 0}
+.qdot{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--muted);background:#fff}
+.qdot.ans{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-dk)}
+.qdot.cur{outline:2px solid var(--teal)}
+/* result */
+.result{max-width:640px;margin:30px auto;text-align:center;padding:36px 26px}
+.scorering{width:150px;height:150px;margin:0 auto 16px;position:relative}
+.scorering svg{transform:rotate(-90deg)}
+.scorering .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:32px;font-weight:800}
+.scorering .pct small{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--muted)}
+.verdict{font-size:38px;font-weight:850;letter-spacing:.04em;margin:6px 0}
+.verdict.pass{color:var(--green)}
+.verdict.fail{color:var(--red)}
+.rline{color:var(--muted);font-size:14px;margin-bottom:20px}
+.review{max-width:720px;margin:20px auto;text-align:left}
+.rvq{padding:15px 17px;margin-bottom:10px;border-left:4px solid var(--line)}
+.rvq.ok{border-left-color:var(--green)}
+.rvq.bad{border-left-color:var(--red)}
+.rvq .rq{font-weight:650;margin-bottom:5px}
+.rvq .ra{font-size:13.5px;margin:2px 0}
+.rvq .expl{font-size:13px;color:var(--muted);margin-top:6px;background:var(--bg);padding:8px 10px;border-radius:8px}
+/* modal */
+.mback{position:fixed;inset:0;background:rgba(20,26,24,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:24px}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:14px}
+.modal.wide{max-width:900px}
+/* admin */
+.admbox{padding:18px 20px;margin-bottom:16px}
+.admbox h3{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.qbrow{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13.5px}
+.qbrow .qbq{flex:1;font-weight:600}
+.qbrow .qbmeta{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:2px}
+.pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--teal-soft);color:var(--teal-dk)}
+.emptybox{padding:34px 20px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:var(--r);font-size:14px}
+/* cert modal */
+.certprev{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
+.crumb{font-size:13px;color:var(--muted);margin-top:18px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.crumb b{color:var(--ink)}
+.crumb button{color:var(--teal);font-weight:600}
+footer.app{max-width:1100px;margin:0 auto;padding:26px 16px;color:var(--muted);font-size:12.5px;text-align:center;border-top:1px solid var(--line)}
+@media(max-width:640px){
+  h1.page{font-size:21px}
+  .verdict{font-size:30px}
+  .qcard{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="hbar">
+  <div class="brand" id="brandhome">
+    <span class="k">SDMBRK COLLECTIONS</span>
+    <span class="t">Regulatory Learning &amp; Certification Portal</span>
+  </div>
+  <div class="hspace"></div>
+  <button class="adm-pill" id="admbtn">Admin: OFF</button>
+</div></header>
+<div class="wrap" id="app"></div>
+<footer class="app">Regulatory Learning &amp; Certification Portal · Pass mark 70% · Built for site & office use · <b>Sdmbrk Collections</b></footer>
+<div class="toast" id="toast"></div>
+<script>
+/* ============ helpers ============ */
+function el(tag,attrs,kids){var n=document.createElement(tag);attrs=attrs||{};
+for(var k in attrs){if(k==='cls')n.className=attrs[k];else if(k==='text')n.textContent=attrs[k];else if(k==='html')n.innerHTML=attrs[k];else if(k.slice(0,2)==='on')n.addEventListener(k.slice(2),attrs[k]);else if(k==='style')n.setAttribute('style',attrs[k]);else n.setAttribute(k,attrs[k]);}
+(kids||[]).forEach(function(c){if(c==null)return;n.appendChild(typeof c==='string'?document.createTextNode(c):c);});return n;}
+function div(cls,kids){return el('div',{cls:cls},kids);}
+function btn(label,cls,fn){return el('button',{cls:'btn '+(cls||''),onclick:fn,text:label});}
+function mount(node){var a=document.getElementById('app');a.innerHTML='';a.appendChild(node);window.scrollTo(0,0);}
+var toastT=null;
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2600);}
+function armBtn(b,fn,label){ // two-tap destructive confirm
+  var armed=false,timer=null;
+  b.addEventListener('click',function(){
+    if(!armed){armed=true;b.classList.add('armed');b.textContent='Tap again to confirm';timer=setTimeout(function(){armed=false;b.classList.remove('armed');b.textContent=label;},3500);}
+    else{clearTimeout(timer);fn();}
+  });return b;}
+function uid(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmtBytes(b){return b>1048576?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';}
+function todayStr(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});}
+
+/* ============ state (localStorage) ============ */
+var LS='rlcp_v1';
+var S=null;
+function save(){localStorage.setItem(LS,JSON.stringify(S));}
+function load(){
+  try{S=JSON.parse(localStorage.getItem(LS));}catch(e){S=null;}
+  if(!S){S=seedState();save();}
+}
+/* ============ IndexedDB for PDFs ============ */
+var idb=null;
+function idbOpen(cb){
+  if(idb)return cb(idb);
+  var rq=indexedDB.open('rlcp_pdfs',1);
+  rq.onupgradeneeded=function(e){e.target.result.createObjectStore('pdfs',{keyPath:'id'});};
+  rq.onsuccess=function(e){idb=e.target.result;cb(idb);};
+  rq.onerror=function(){toast('Storage unavailable — PDFs cannot be saved');};
+}
+function pdfPut(rec,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').put(rec);tx.oncomplete=cb;tx.onerror=function(){toast('PDF save failed (file too large?)');};});}
+function pdfGet(id,cb){idbOpen(function(db){var rq=db.transaction('pdfs').objectStore('pdfs').get(id);rq.onsuccess=function(){cb(rq.result);};});}
+function pdfDel(id,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').delete(id);tx.oncomplete=cb;});}
+
+/* ============ seed data: Dubai Codes ============ */
+function seedState(){
+  return {
+    adminPass:'sdmbrk', adminOn:false,
+    results:[], // {id,cat,exam,name,score,total,pct,pass,date,vid}
+    cats:[
+      { id:'dubai-codes', name:'Dubai Codes', icon:'🏗️', active:true,
+        desc:'Dubai Building Code (DBC) — study notes, reference documents and certification exam.',
+        docs:[], // {id,name,size}
+        sections: seedSections(),
+        questions: seedQuestions(),
+        examName:'Dubai Building Code Certification',
+        quizCount:20
+      },
+      { id:'dewa', name:'DEWA Regulations', icon:'⚡', active:false,
+        desc:'DEWA Regulations for Electrical Installations — coming soon.',
+        docs:[],sections:[],questions:[],examName:'DEWA Regulations Certification',quizCount:20},
+      { id:'dcd', name:'Dubai Civil Defense', icon:'🧯', active:false,
+        desc:'UAE Fire & Life Safety Code of Practice — coming soon.',
+        docs:[],sections:[],questions:[],examName:'DCD Fire & Life Safety Certification',quizCount:20}
+    ]
+  };
+}
+function seedSections(){
+ return [
+ {id:uid(),title:'DBC Overview & Applicability',img:null,notes:
+"## Purpose & scope\n- The Dubai Building Code (DBC) sets minimum technical requirements for design and construction of buildings in the Emirate of Dubai.\n- Administered by Dubai Municipality; applies to new buildings, extensions and material alterations.\n- Works alongside (not instead of) authority regulations: DEWA, DCD (UAE Fire & Life Safety Code), DDA/Trakhees where applicable, and Dubai Municipality circulars.\n## Structure\n- Part A — General; Part B — Access & Circulation (incl. accessibility); Part C — Fire (defers to UAE FLS Code); Part D — Structure; Part E — Services (MEP); Part F — Environment / Al Sa'fat; Part G — Building Systems.\n!! On site: the most restrictive requirement between DBC and the authority code governs. Never assume DBC alone is sufficient for fire or utility matters."},
+ {id:uid(),title:'Access, Egress & Accessibility (Part B)',img:null,notes:
+"## Key dimensional requirements (typical villa/residential)\n| Element | Minimum requirement |\n| Door clear width (habitable rooms) | 800 mm clear |\n| Accessible entrance door | 850–900 mm clear |\n| Corridor width (dwelling) | 900 mm |\n| Stair riser (private stair) | max 190 mm |\n| Stair going (private stair) | min 250 mm |\n| Handrail height | 900–1000 mm above pitch line |\n| Guarding height (balconies) | min 1100 mm |\n- Guarding gaps must not allow a 100 mm sphere to pass (child safety).\n- Level thresholds (max 15 mm, chamfered) at accessible entrances.\n## Sanitary provision\n- At least one accessible WC on the entrance level of accessible dwellings.\n!! Balcony guarding on villas is a recurring consultant comment — verify 1100 mm from finished floor level after tiling, not from slab."},
+ {id:uid(),title:'Structure & Materials (Part D)',img:null,notes:
+"## Design basis\n- Loads and combinations generally follow international standards adopted by DBC (dead, imposed, wind per local wind maps, seismic zoning for Dubai).\n- Durability: concrete cover and mix designed for hot, saline, sulphate-bearing ground conditions — typical severe exposure classes for foundations.\n## Practical site notes\n- Concrete in foundations commonly requires SRC or PC+GGBS/PFA blends with protective coatings + polythene separation per soil report.\n- Curing is critical in UAE summer: retain moisture minimum 7 days; avoid casting large pours in peak afternoon temperatures.\n!! Hot-weather concreting: max concrete temperature at placement is typically 32°C per specifications — check the project spec, plan ice/chilled water with the batching plant."},
+ {id:uid(),title:'Building Services — Electrical & Mechanical (Part E)',img:null,notes:
+"## Electrical\n- Electrical installations must comply with DEWA Regulations for Electrical Installations (current edition) — DBC defers to DEWA.\n- Standard LV system: 400/230 V, 3-phase, 50 Hz, TN-S earthing per DEWA.\n- Cable sizing to IEC 60228 conductor classes; derate for 50°C ambient and grouping.\n- RCD protection (30 mA) required for socket circuits and wet areas.\n## Mechanical & plumbing\n- Ventilation rates, condensate drainage and fresh-air provision per DBC Part E and Dubai Municipality requirements.\n- Water supply and drainage per DM / ADSSC-aligned standards; backflow prevention on connections to potable water.\n!! Condensate drains from FCUs must be trapped and routed with fall — untrapped condensate lines are a classic snag causing ceiling stains that get mistaken for leaks."},
+ {id:uid(),title:'Fire Safety Interface (Part C → UAE FLS Code)',img:null,notes:
+"## Division of responsibility\n- DBC Part C points to the UAE Fire & Life Safety Code of Practice (DCD) for fire matters: compartmentation, escape distances, fire-rated doors, detection & alarm, firefighting systems.\n## Villa-level essentials\n- Smoke detectors in bedrooms, corridors and living areas connected to a home alarm panel.\n- Kitchen: heat detector (not smoke) to avoid nuisance alarms.\n- Fire-rated door and self-closer where garage connects to dwelling.\n- LPG cylinders: outdoor ventilated enclosure, piping per DCD requirements.\n!! Any deviation on fire systems needs DCD approval — municipality approval alone does not cover fire."},
+ ];
+}
+function seedQuestions(){
+ function q(sec,txt,opts,c,ex){return{id:uid(),sec:sec,q:txt,opts:opts,c:c,ex:ex};}
+ var A='DBC Overview & Applicability',B='Access, Egress & Accessibility (Part B)',D='Structure & Materials (Part D)',E='Building Services — Electrical & Mechanical (Part E)',F='Fire Safety Interface (Part C → UAE FLS Code)';
+ return [
+ q(A,'Which authority administers the Dubai Building Code?',['DEWA','Dubai Municipality','Dubai Civil Defense','RTA'],1,'The DBC is issued and administered by Dubai Municipality.'),
+ q(A,'When DBC and an authority code (e.g., UAE FLS Code) give different requirements, which applies?',['Always the DBC','Always the authority code','The more restrictive requirement','Whichever the contractor prefers'],2,'The most restrictive requirement between applicable codes governs.'),
+ q(A,'Fire and life safety requirements in Dubai are primarily governed by which document?',['DBC Part D','UAE Fire & Life Safety Code of Practice','IEC 60228','Al Sa\'fat manual'],1,'DBC Part C defers to the UAE FLS Code administered by DCD.'),
+ q(A,'Al Sa\'fat relates to which aspect of building regulation in Dubai?',['Structural loading','Green building / sustainability rating','Elevator safety','Road access'],1,'Al Sa\'fat is Dubai\'s green building evaluation system.'),
+ q(A,'The DBC applies to which of the following?',['Only government buildings','Only high-rise towers','New buildings, extensions and material alterations','Temporary site offices only'],2,'DBC covers new construction plus extensions and material alterations.'),
+ q(B,'Minimum clear width for a door to a habitable room in a dwelling is typically:',['600 mm','700 mm','800 mm','1000 mm'],2,'800 mm clear opening is the typical minimum for habitable room doors.'),
+ q(B,'Minimum guarding (balustrade) height at a villa balcony is:',['900 mm','1000 mm','1100 mm','1200 mm'],2,'External balconies require minimum 1100 mm guarding, measured from finished floor level.'),
+ q(B,'Openings in guarding must not allow passage of a sphere of diameter:',['50 mm','100 mm','150 mm','200 mm'],1,'The 100 mm sphere rule prevents children passing through or becoming trapped.'),
+ q(B,'For a private stair within a dwelling, the maximum riser is typically:',['150 mm','170 mm','190 mm','220 mm'],2,'Private stairs: max riser 190 mm with min going 250 mm.'),
+ q(B,'Handrail height above the stair pitch line should be within:',['700–800 mm','800–900 mm','900–1000 mm','1100–1200 mm'],2,'Handrails are fixed 900–1000 mm above the pitch line / landing floor.'),
+ q(B,'Maximum threshold height at an accessible entrance (chamfered) is:',['15 mm','25 mm','40 mm','50 mm'],0,'Accessible thresholds are limited to 15 mm and should be chamfered.'),
+ q(B,'Guarding height must be verified from:',['Structural slab level','Finished floor level','Top of skirting','Underside of ceiling'],1,'Measure from FFL after floor finishes — tiling reduces effective guarding height.'),
+ q(D,'Concrete durability design in Dubai foundations must primarily address:',['Freeze–thaw cycles','Sulphate and chloride attack from soil/groundwater','Volcanic activity','Timber decay'],1,'Hot saline, sulphate-bearing ground drives durability requirements (SRC/GGBS mixes, coatings).'),
+ q(D,'Typical maximum concrete temperature at placement in UAE hot-weather specifications is:',['25°C','32°C','40°C','45°C'],1,'32°C at placement is the common specification limit — plan chilled water/ice with the plant.'),
+ q(D,'Minimum recommended moist curing period for structural concrete on site is:',['1 day','3 days','7 days','21 days'],2,'Retain moisture for at least 7 days; more critical in UAE summer.'),
+ q(D,'GGBS or PFA is blended into foundation concrete mainly to:',['Speed up setting','Improve resistance to sulphate/chloride attack','Reduce cement cost only','Add colour'],1,'Supplementary cementitious materials improve durability in aggressive ground.'),
+ q(E,'Electrical installations under the DBC must comply with:',['NEC (US)','DEWA Regulations for Electrical Installations','BS 7671 only','Contractor\'s method statement'],1,'DBC Part E defers electrical work to DEWA Regulations.'),
+ q(E,'The standard DEWA low-voltage 3-phase supply is:',['220/110 V, 60 Hz','380/220 V, 60 Hz','400/230 V, 50 Hz','415/240 V, 50 Hz'],2,'Dubai LV system is 400/230 V, 3-phase, 50 Hz.'),
+ q(E,'Cable current ratings on Dubai sites are derated for an ambient temperature of:',['30°C','35°C','45°C','50°C'],3,'50°C ambient is the standard design assumption per DEWA practice.'),
+ q(E,'RCD protection at 30 mA is required for:',['Lighting circuits only','Socket-outlet circuits and wet areas','Fixed AC units only','Earthing conductors'],1,'30 mA RCDs protect socket circuits and locations with water risk.'),
+ q(E,'Conductor classes for cables are defined in which standard?',['IEC 60228','IEC 60034','ISO 9001','ASTM C150'],0,'IEC 60228 defines conductor classes (1 solid, 2 stranded, 5 flexible).'),
+ q(E,'FCU condensate drain lines must be:',['Run without slope','Trapped and laid to fall','Connected directly to soil stack without trap','Left open above ceiling'],1,'Untrapped or flat condensate lines cause ceiling staining that mimics leaks.'),
+ q(F,'Which detector type is recommended in villa kitchens?',['Ionisation smoke detector','Optical smoke detector','Heat detector','Beam detector'],2,'Heat detectors avoid nuisance alarms from cooking fumes.'),
+ q(F,'A door between an attached garage and the dwelling must be:',['Standard hollow-core','Fire-rated with self-closer','Sliding glass','Louvred'],1,'Garage-to-dwelling doors are fire-rated and self-closing.'),
+ q(F,'LPG cylinders serving a villa kitchen should be located:',['Under the kitchen sink','In the bedroom closet','In an outdoor ventilated enclosure','On the roof without enclosure'],2,'DCD requires outdoor ventilated enclosures with compliant piping.'),
+ q(F,'Changes to fire alarm or firefighting systems require approval from:',['Dubai Municipality only','The main contractor','Dubai Civil Defense','DEWA'],2,'Fire system deviations need DCD approval — DM approval does not cover fire.'),
+ ];
+}
+</script>
+<script>
+/* ============ mini markdown for notes ============ */
+function renderNotes(txt){
+  var box=div('notes'),lines=String(txt||'').split('\n'),i=0;
+  while(i<lines.length){
+    var L=lines[i];
+    if(/^\|/.test(L)){ // table
+      var rows=[];while(i<lines.length&&/^\|/.test(lines[i])){rows.push(lines[i].replace(/^\||\|$/g,'').split('|').map(function(c){return c.trim();}));i++;}
+      var tb=el('table');rows.forEach(function(r,ri){var tr=el('tr');r.forEach(function(c){tr.appendChild(el(ri===0?'th':'td',{text:c}));});tb.appendChild(tr);});
+      box.appendChild(tb);continue;
+    }
+    if(/^## /.test(L)){box.appendChild(el('h4',{text:L.slice(3)}));i++;continue;}
+    if(/^!! /.test(L)){box.appendChild(div('warnbox',['⚠ '+L.slice(3)]));i++;continue;}
+    if(/^- /.test(L)){var ul=el('ul');while(i<lines.length&&/^- /.test(lines[i])){ul.appendChild(el('li',{text:lines[i].slice(2)}));i++;}box.appendChild(ul);continue;}
+    if(L.trim()){box.appendChild(el('p',{text:L}));}
+    i++;
+  }
+  return box;
+}
+function cat(id){return S.cats.filter(function(c){return c.id===id;})[0];}
+
+/* ============ modal ============ */
+function modal(title,bodyNodes,wide){
+  var back=div('mback');
+  var m=div('modal'+(wide?' wide':''),[el('h3',{text:title})]);
+  bodyNodes.forEach(function(n){m.appendChild(n);});
+  back.appendChild(m);
+  back.addEventListener('click',function(e){if(e.target===back)back.remove();});
+  document.body.appendChild(back);
+  return back;
+}
+
+/* ============ dashboard ============ */
+function vDash(){
+  var w=div('',[
+    el('div',{cls:'eyebrow',text:'Dashboard'}),
+    el('h1',{cls:'page',text:'Regulation Categories'}),
+    el('p',{cls:'sub',text:'Study reference documents, revise section notes, then sit the certification exam. Pass mark is 70%.'})
+  ]);
+  var g=div('catgrid');
+  S.cats.forEach(function(c){
+    var card=div('catcard card'+(c.active?'':' ph'),[
+      div('cico',[c.icon||'📘']),
+      el('h3',{text:c.name}),
+      el('div',{cls:'sub',text:c.desc,style:'font-size:13px'}),
+      div('meta',[el('span',{text:'📄 '+c.docs.length+' docs'}),el('span',{text:'📖 '+c.sections.length+' sections'}),el('span',{text:'❓ '+c.questions.length+' questions'})]),
+      el('span',{cls:'tagline '+(c.active?'tag-act':'tag-ph'),text:c.active?'ACTIVE':'COMING SOON'})
+    ]);
+    if(c.active||S.adminOn)card.addEventListener('click',function(){vCat(c.id,'study');});
+    g.appendChild(card);
+  });
+  if(S.adminOn){
+    g.appendChild(div('catcard card addnew',['＋  Add New Category']));
+    g.lastChild.addEventListener('click',admAddCat);
+  }
+  w.appendChild(g);
+  if(S.results.length){
+    w.appendChild(el('h2',{cls:'sec',text:'Recent results'}));
+    var list=div('doclist');
+    S.results.slice(-6).reverse().forEach(function(r){
+      list.appendChild(div('docrow card',[
+        el('div',{cls:'dico',style:'background:'+(r.pass?'var(--green-soft)':'var(--red-soft)')+';color:'+(r.pass?'var(--green-dk)':'var(--red)'),text:r.pct+'%'}),
+        el('div',{},[el('div',{cls:'dnm',text:r.name+' — '+r.exam}),el('div',{cls:'dsz',text:r.date+' · '+(r.pass?'PASSED':'FAILED')+' · ID '+r.vid})]),
+        div('dsp'),
+        r.pass?btn('Certificate','sm',function(){openCert(r);}):null
+      ]));
+    });
+    w.appendChild(list);
+  }
+  mount(w);
+}
+
+/* ============ category view ============ */
+function vCat(cid,tab){
+  var c=cat(cid);
+  var w=div('',[
+    div('crumb',[el('button',{text:'Dashboard',onclick:vDash}),el('span',{text:'›'}),el('b',{text:c.name})]),
+    el('h1',{cls:'page',text:c.name,style:'margin-top:8px'}),
+    el('p',{cls:'sub',text:c.desc})
+  ]);
+  var tabs=[['study','Study Center'],['docs','Documents'],['exam','Exam'],['results','My Results']];
+  if(S.adminOn)tabs.push(['manage','⚙ Manage']);
+  var tb=div('tabs');
+  tabs.forEach(function(t){tb.appendChild(el('button',{cls:'tab'+(t[0]===tab?' on':''),text:t[1],onclick:function(){vCat(cid,t[0]);}}));});
+  w.appendChild(tb);
+  var body=div('');w.appendChild(body);
+  if(tab==='docs')tabDocs(c,body);
+  if(tab==='study')tabStudy(c,body);
+  if(tab==='exam')tabExam(c,body);
+  if(tab==='results')tabResults(c,body);
+  if(tab==='manage')tabManage(c,body);
+  mount(w);
+}
+
+/* ---- documents ---- */
+function tabDocs(c,body){
+  if(S.adminOn){
+    var up=div('admbox card',[el('h3',{text:'📤 Upload reference PDF'}),
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'PDFs are stored locally in this browser (IndexedDB). If the file picker does not open, use Chrome directly rather than an in-app viewer.'}),
+      el('input',{type:'file',accept:'application/pdf',id:'pdfup'})]);
+    up.querySelector('#pdfup').addEventListener('change',function(e){
+      var f=e.target.files[0];if(!f)return;
+      var fr=new FileReader();
+      fr.onload=function(){
+        var id=uid();
+        pdfPut({id:id,name:f.name,data:fr.result},function(){
+          c.docs.push({id:id,name:f.name,size:f.size});save();toast('PDF saved');vCat(c.id,'docs');
+        });
+      };
+      fr.readAsArrayBuffer(f);
+    });
+    body.appendChild(up);
+  }
+  if(!c.docs.length){body.appendChild(div('emptybox',['No reference documents yet.'+(S.adminOn?'':' Ask an admin to upload the code PDFs.')]));return;}
+  var list=div('doclist');
+  c.docs.forEach(function(d){
+    var row=div('docrow card',[div('dico',['PDF']),
+      el('div',{},[el('div',{cls:'dnm',text:d.name}),el('div',{cls:'dsz',text:fmtBytes(d.size)})]),
+      div('dsp'),
+      btn('Open','sm pri',function(){openPdf(c,d,body);})]);
+    if(S.adminOn){row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){
+      pdfDel(d.id,function(){c.docs=c.docs.filter(function(x){return x.id!==d.id;});save();toast('Deleted');vCat(c.id,'docs');});
+    },'Delete'));}
+    list.appendChild(row);
+  });
+  body.appendChild(list);
+  var vb=div('viewerbox');vb.id='pdfviewer';body.appendChild(vb);
+}
+function openPdf(c,d,body){
+  pdfGet(d.id,function(rec){
+    if(!rec){toast('File not found in local storage');return;}
+    var blob=new Blob([rec.data],{type:'application/pdf'});
+    var url=URL.createObjectURL(blob);
+    var vb=document.getElementById('pdfviewer');vb.innerHTML='';
+    vb.appendChild(el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px'},[
+      el('b',{text:d.name}),
+      btn('Open in new tab ↗','sm',function(){window.open(url,'_blank');})
+    ]));
+    vb.appendChild(el('iframe',{src:url,title:d.name}));
+    vb.scrollIntoView({behavior:'smooth'});
+  });
+}
+
+/* ---- study ---- */
+function tabStudy(c,body){
+  if(!c.sections.length){body.appendChild(div('emptybox',['No study sections yet.']));return;}
+  c.sections.forEach(function(s,i){
+    var sec=div('studysec card',[el('h3',{},[div('snum',[String(i+1)]),el('span',{text:s.title})])]);
+    if(s.img)sec.appendChild(el('img',{src:s.img,alt:s.title,style:'max-width:100%;border-radius:9px;border:1px solid var(--line);margin-top:10px'}));
+    sec.appendChild(renderNotes(s.notes));
+    body.appendChild(sec);
+  });
+}
+
+/* ---- exam ---- */
+function tabExam(c,body){
+  if(!c.questions.length){body.appendChild(div('emptybox',['No questions in the bank yet.']));return;}
+  var n=Math.min(c.quizCount||20,c.questions.length);
+  var intro=div('result card',[
+    el('div',{cls:'eyebrow',text:c.examName}),
+    el('h2',{cls:'sec',style:'margin-top:4px',text:'Ready to start?'}),
+    el('p',{cls:'rline',text:n+' questions drawn from a bank of '+c.questions.length+' · Pass mark 70% · Instant scoring'}),
+    btn('Start Exam','pri',function(){startQuiz(c,n);})
+  ]);
+  body.appendChild(intro);
+}
+var QZ=null;
+function startQuiz(c,n){
+  var pool=c.questions.slice();
+  for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  QZ={cid:c.id,qs:pool.slice(0,n),ans:new Array(n).fill(-1),cur:0};
+  vQuiz();
+}
+function vQuiz(){
+  var c=cat(QZ.cid),i=QZ.cur,q=QZ.qs[i],n=QZ.qs.length;
+  var w=div('qwrap',[
+    div('crumb',[el('button',{text:'‹ Exit exam',onclick:function(){vCat(c.id,'exam');}}),div('dsp'),el('b',{text:c.examName})]),
+    div('qprog',[el('i',{style:'width:'+Math.round((i+1)/n*100)+'%'})])
+  ]);
+  var dots=div('qdots');
+  QZ.qs.forEach(function(_,di){
+    dots.appendChild(el('button',{cls:'qdot'+(QZ.ans[di]>=0?' ans':'')+(di===i?' cur':''),text:String(di+1),onclick:function(){QZ.cur=di;vQuiz();}}));
+  });
+  w.appendChild(dots);
+  var qc=div('qcard card',[el('div',{cls:'qnum',text:'Question '+(i+1)+' of '+n+' · '+q.sec}),el('div',{cls:'qtext',text:q.q})]);
+  q.opts.forEach(function(o,oi){
+    var opt=div('opt'+(QZ.ans[i]===oi?' sel':''),[div('ol',[String.fromCharCode(65+oi)]),el('span',{text:o})]);
+    opt.addEventListener('click',function(){QZ.ans[i]=oi;vQuiz();});
+    qc.appendChild(opt);
+  });
+  var nav=div('qnav',[
+    btn('‹ Previous','',function(){if(i>0){QZ.cur--;vQuiz();}}),
+    div('dsp')
+  ]);
+  nav.firstChild.disabled=(i===0);
+  if(i<n-1)nav.appendChild(btn('Next ›','pri',function(){QZ.cur++;vQuiz();}));
+  else{
+    var unans=QZ.ans.filter(function(a){return a<0;}).length;
+    var sb=btn(unans?('Submit ('+unans+' unanswered)'):'Submit Exam','grn',function(){finishQuiz();});
+    nav.appendChild(sb);
+  }
+  qc.appendChild(nav);
+  w.appendChild(qc);
+  mount(w);
+}
+function finishQuiz(){
+  var c=cat(QZ.cid),n=QZ.qs.length,score=0;
+  QZ.qs.forEach(function(q,i){if(QZ.ans[i]===q.c)score++;});
+  var pct=Math.round(score/n*100),pass=pct>=70;
+  var vid='SDM-'+c.id.split('-').map(function(p){return p[0].toUpperCase();}).join('')+'-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+uid();
+  var rec={id:uid(),cat:c.id,exam:c.examName,name:'',score:score,total:n,pct:pct,pass:pass,date:todayStr(),vid:vid,qs:QZ.qs.map(function(q,i){return{q:q.q,opts:q.opts,c:q.c,a:QZ.ans[i],ex:q.ex};})};
+  S.results.push(rec);save();
+  vResult(rec);
+}
+function vResult(r){
+  var c=cat(r.cat);
+  var circ=2*Math.PI*64;
+  var ring=div('scorering',[]);
+  ring.innerHTML='<svg width="150" height="150"><circle cx="75" cy="75" r="64" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="75" cy="75" r="64" fill="none" stroke="'+(r.pass?'var(--green)':'var(--red)')+'" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+(circ*(1-r.pct/100))+'"/></svg>';
+  ring.appendChild(div('pct',[el('span',{text:r.pct+'%'}),el('small',{text:r.score+' / '+r.total})]));
+  var w=div('',[div('result card',[
+    el('div',{cls:'eyebrow',text:r.exam}),
+    ring,
+    el('div',{cls:'verdict '+(r.pass?'pass':'fail'),text:r.pass?'PASSED':'FAILED'}),
+    el('p',{cls:'rline',text:r.pass?'Congratulations — you met the 70% pass mark. Verification ID '+r.vid:'Pass mark is 70%. Review the sections below and try again.'}),
+    el('div',{style:'display:flex;gap:10px;justify-content:center;flex-wrap:wrap'},[
+      r.pass?btn('⬇ Download Certificate','grn',function(){openCert(r);}):btn('↻ Retake Exam','pri',function(){vCat(r.cat,'exam');}),
+      btn('Study Center','',function(){vCat(r.cat,'study');}),
+      btn('Dashboard','',function(){vDash();})
+    ])
+  ])]);
+  if(r.qs){
+    var rv=div('review',[el('h2',{cls:'sec',text:'Answer review'})]);
+    r.qs.forEach(function(q,i){
+      var ok=q.a===q.c;
+      rv.appendChild(div('rvq card '+(ok?'ok':'bad'),[
+        el('div',{cls:'rq',text:(i+1)+'. '+q.q}),
+        el('div',{cls:'ra',text:'Your answer: '+(q.a>=0?String.fromCharCode(65+q.a)+'. '+q.opts[q.a]:'— not answered'),style:'color:'+(ok?'var(--green-dk)':'var(--red)')}),
+        ok?null:el('div',{cls:'ra',text:'Correct: '+String.fromCharCode(65+q.c)+'. '+q.opts[q.c],style:'color:var(--green-dk)'}),
+        q.ex?div('expl',['💡 '+q.ex]):null
+      ]));
+    });
+    w.appendChild(rv);
+  }
+  mount(w);
+}
+
+/* ---- results tab ---- */
+function tabResults(c,body){
+  var rs=S.results.filter(function(r){return r.cat===c.id;});
+  if(!rs.length){body.appendChild(div('emptybox',['No attempts yet — sit the exam to see results here.']));return;}
+  var list=div('doclist');
+  rs.slice().reverse().forEach(function(r){
+    list.appendChild(div('docrow card',[
+      el('div',{cls:'dico',style:'background:'+(r.pass?'var(--green-soft)':'var(--red-soft)')+';color:'+(r.pass?'var(--green-dk)':'var(--red)'),text:r.pct+'%'}),
+      el('div',{},[el('div',{cls:'dnm',text:(r.pass?'PASSED':'FAILED')+' · '+r.score+'/'+r.total}),el('div',{cls:'dsz',text:r.date+' · ID '+r.vid})]),
+      div('dsp'),
+      btn('Review','sm',function(){vResult(r);}),
+      r.pass?btn('Certificate','sm grn',function(){openCert(r);}):null
+    ]));
+  });
+  body.appendChild(list);
+}
+</script>
+<script>
+/* ============ admin ============ */
+function admToggle(){
+  if(S.adminOn){S.adminOn=false;save();refreshAdm();vDash();toast('Admin mode off');return;}
+  var inp=el('input',{type:'password',placeholder:'Passcode'});
+  var m=modal('Enter admin passcode',[
+    div('field',[inp]),
+    div('',[btn('Unlock','pri',function(){
+      if(inp.value===S.adminPass){S.adminOn=true;save();refreshAdm();m.remove();vDash();toast('Admin mode on');}
+      else toast('Wrong passcode');
+    })])
+  ]);
+  inp.focus();
+}
+function refreshAdm(){
+  var b=document.getElementById('admbtn');
+  b.textContent='Admin: '+(S.adminOn?'ON':'OFF');
+  b.classList.toggle('on',S.adminOn);
+}
+function admAddCat(){
+  var nm=el('input',{placeholder:'e.g. Dubai Civil Defense'});
+  var ds=el('input',{placeholder:'Short description'});
+  var ic=el('input',{placeholder:'Emoji icon (e.g. 🧯)',value:'📘'});
+  var ex=el('input',{placeholder:'Exam name for certificate'});
+  var m=modal('Add new category',[
+    div('field',[el('label',{text:'Category name'}),nm]),
+    div('field',[el('label',{text:'Description'}),ds]),
+    div('field',[el('label',{text:'Icon'}),ic]),
+    div('field',[el('label',{text:'Exam name'}),ex]),
+    btn('Create category','pri',function(){
+      if(!nm.value.trim()){toast('Name required');return;}
+      S.cats.push({id:nm.value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-'),name:nm.value.trim(),icon:ic.value||'📘',active:true,desc:ds.value,docs:[],sections:[],questions:[],examName:ex.value||nm.value+' Certification',quizCount:20});
+      save();m.remove();vDash();toast('Category created');
+    })
+  ]);
+}
+function tabManage(c,body){
+  /* settings */
+  var nmI=el('input',{value:c.name}),exI=el('input',{value:c.examName}),qcI=el('input',{type:'number',min:'1',value:c.quizCount||20});
+  var actI=el('select');['Active','Placeholder (Coming soon)'].forEach(function(o,i){actI.appendChild(el('option',{value:i?'0':'1',text:o}));});
+  actI.value=c.active?'1':'0';
+  body.appendChild(div('admbox card',[el('h3',{text:'⚙ Category settings'}),
+    div('field',[el('label',{text:'Name'}),nmI]),
+    div('field',[el('label',{text:'Exam name (appears on certificate)'}),exI]),
+    div('field',[el('label',{text:'Questions per exam'}),qcI]),
+    div('field',[el('label',{text:'Status'}),actI]),
+    btn('Save settings','pri',function(){c.name=nmI.value;c.examName=exI.value;c.quizCount=Math.max(1,parseInt(qcI.value)||20);c.active=actI.value==='1';save();toast('Saved');vCat(c.id,'manage');})
+  ]));
+  /* sections */
+  var sbox=div('admbox card',[el('h3',{text:'📖 Study sections ('+c.sections.length+')'})]);
+  c.sections.forEach(function(s,i){
+    var row=div('qbrow',[el('div',{cls:'qbq'},[el('div',{text:(i+1)+'. '+s.title}),el('div',{cls:'qbmeta',text:(s.notes||'').slice(0,90)+'…'})]),
+      btn('Edit','sm',function(){admEditSection(c,s);})]);
+    row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){c.sections=c.sections.filter(function(x){return x.id!==s.id;});save();vCat(c.id,'manage');},'Delete'));
+    sbox.appendChild(row);
+  });
+  sbox.appendChild(btn('＋ Add section','',function(){admEditSection(c,null);}));
+  body.appendChild(sbox);
+  /* questions */
+  var qbox=div('admbox card',[el('h3',{text:'❓ Question bank ('+c.questions.length+')'})]);
+  c.questions.forEach(function(q,i){
+    var row=div('qbrow',[el('div',{cls:'qbq'},[el('div',{text:(i+1)+'. '+q.q}),el('div',{cls:'qbmeta',text:q.sec+' · Correct: '+String.fromCharCode(65+q.c)})]),
+      btn('Edit','sm',function(){admEditQ(c,q);})]);
+    row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){c.questions=c.questions.filter(function(x){return x.id!==q.id;});save();vCat(c.id,'manage');},'Delete'));
+    qbox.appendChild(row);
+  });
+  qbox.appendChild(btn('＋ Add question','',function(){admEditQ(c,null);}));
+  body.appendChild(qbox);
+  /* passcode */
+  var pcI=el('input',{type:'password',placeholder:'New passcode'});
+  body.appendChild(div('admbox card',[el('h3',{text:'🔐 Admin passcode'}),
+    div('field',[pcI]),
+    btn('Change passcode','',function(){if(pcI.value.length<4){toast('Min 4 characters');return;}S.adminPass=pcI.value;save();toast('Passcode changed');})
+  ]));
+}
+function admEditSection(c,s){
+  var isNew=!s;if(isNew)s={id:uid(),title:'',notes:'',img:null};
+  var tI=el('input',{value:s.title,placeholder:'Section title'});
+  var nI=el('textarea',{placeholder:'Notes. Formatting: "## " heading · "- " bullet · "| a | b |" table row · "!! " warning box'});
+  nI.value=s.notes||'';
+  var imgI=el('input',{type:'file',accept:'image/*'});
+  var imgData=s.img;
+  imgI.addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){imgData=fr.result;toast('Image attached');};fr.readAsDataURL(f);});
+  var m=modal((isNew?'Add':'Edit')+' study section',[
+    div('field',[el('label',{text:'Title'}),tI]),
+    div('field',[el('label',{text:'Notes'}),nI]),
+    div('field',[el('label',{text:'Diagram / image (optional)'}),imgI]),
+    btn('Save section','pri',function(){
+      if(!tI.value.trim()){toast('Title required');return;}
+      s.title=tI.value.trim();s.notes=nI.value;s.img=imgData;
+      if(isNew)c.sections.push(s);
+      save();m.remove();vCat(c.id,'manage');toast('Section saved');
+    })
+  ],true);
+}
+function admEditQ(c,q){
+  var isNew=!q;if(isNew)q={id:uid(),sec:'',q:'',opts:['','','',''],c:0,ex:''};
+  var secI=el('select');
+  c.sections.forEach(function(s){secI.appendChild(el('option',{value:s.title,text:s.title}));});
+  secI.appendChild(el('option',{value:'General',text:'General'}));
+  secI.value=q.sec||'General';
+  var qI=el('textarea',{style:'min-height:60px'});qI.value=q.q;
+  var oIs=q.opts.map(function(o,i){return el('input',{value:o,placeholder:'Option '+String.fromCharCode(65+i)});});
+  var cI=el('select');['A','B','C','D'].forEach(function(L,i){cI.appendChild(el('option',{value:String(i),text:L}));});
+  cI.value=String(q.c);
+  var exI=el('input',{value:q.ex||'',placeholder:'Shown in answer review'});
+  var kids=[div('field',[el('label',{text:'Section'}),secI]),div('field',[el('label',{text:'Question'}),qI])];
+  oIs.forEach(function(o,i){kids.push(div('field',[el('label',{text:'Option '+String.fromCharCode(65+i)}),o]));});
+  kids.push(div('field',[el('label',{text:'Correct answer'}),cI]));
+  kids.push(div('field',[el('label',{text:'Explanation (optional)'}),exI]));
+  kids.push(btn('Save question','pri',function(){
+    if(!qI.value.trim()){toast('Question text required');return;}
+    if(oIs.some(function(o){return !o.value.trim();})){toast('All 4 options required');return;}
+    q.sec=secI.value;q.q=qI.value.trim();q.opts=oIs.map(function(o){return o.value.trim();});q.c=parseInt(cI.value);q.ex=exI.value;
+    if(isNew)c.questions.push(q);
+    save();m.remove();vCat(c.id,'manage');toast('Question saved');
+  }));
+  var m=modal((isNew?'Add':'Edit')+' question',kids,true);
+}
+
+/* ============ certificate ============ */
+function openCert(r){
+  var nmI=el('input',{value:r.name||'',placeholder:'Full name as it should appear'});
+  var cv=el('canvas',{cls:'certprev'});
+  function redraw(){r.name=nmI.value;drawCert(cv,r);}
+  nmI.addEventListener('input',redraw);
+  var m=modal('Certificate — '+r.exam,[
+    div('field',[el('label',{text:'Candidate name'}),nmI]),
+    cv,
+    el('div',{style:'display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'}),
+  ],true);
+  var btns=m.querySelector('.modal').lastChild;
+  btns.appendChild(btn('⬇ Download PDF','grn',function(){certPdf(cv,r);}));
+  btns.appendChild(btn('⬇ Download PNG','',function(){
+    var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});a.click();
+  }));
+  redraw();
+  save();
+  nmI.addEventListener('change',save);
+}
+function drawCert(cv,r){
+  var W=2000,H=1414;cv.width=W;cv.height=H;
+  var x=cv.getContext('2d');
+  /* background */
+  x.fillStyle='#FDFDFB';x.fillRect(0,0,W,H);
+  /* subtle blueprint grid */
+  x.strokeStyle='rgba(14,124,123,0.05)';x.lineWidth=1;
+  for(var g=0;g<W;g+=50){x.beginPath();x.moveTo(g,0);x.lineTo(g,H);x.stroke();}
+  for(g=0;g<H;g+=50){x.beginPath();x.moveTo(0,g);x.lineTo(W,g);x.stroke();}
+  /* borders */
+  x.strokeStyle='#0E7C7B';x.lineWidth=14;x.strokeRect(40,40,W-80,H-80);
+  x.strokeStyle='#C9A227';x.lineWidth=3;x.strokeRect(68,68,W-136,H-136);
+  /* corner ticks */
+  x.strokeStyle='#C9A227';x.lineWidth=5;
+  [[90,90,1,1],[W-90,90,-1,1],[90,H-90,1,-1],[W-90,H-90,-1,-1]].forEach(function(k){
+    x.beginPath();x.moveTo(k[0],k[1]+40*k[3]);x.lineTo(k[0],k[1]);x.lineTo(k[0]+40*k[2],k[1]);x.stroke();
+  });
+  x.textAlign='center';
+  /* brand */
+  x.fillStyle='#0E7C7B';x.font='700 26px "Segoe UI",Arial';
+  x.fillText('S D M B R K   C O L L E C T I O N S',W/2,150);
+  x.fillStyle='#8A948F';x.font='400 22px "Segoe UI",Arial';
+  x.fillText('Regulatory Learning & Certification Portal',W/2,186);
+  /* title */
+  x.fillStyle='#1C2422';x.font='400 88px Georgia,serif';
+  x.fillText('Certificate of Achievement',W/2,300);
+  x.strokeStyle='#C9A227';x.lineWidth=3;
+  x.beginPath();x.moveTo(W/2-260,330);x.lineTo(W/2+260,330);x.stroke();
+  /* body */
+  x.fillStyle='#5F6B67';x.font='400 30px "Segoe UI",Arial';
+  x.fillText('This is to certify that',W/2,410);
+  x.fillStyle='#0A5B5A';x.font='italic 700 80px Georgia,serif';
+  x.fillText(r.name||'Candidate Name',W/2,510);
+  x.strokeStyle='#DDE4E1';x.lineWidth=2;
+  x.beginPath();x.moveTo(W/2-480,535);x.lineTo(W/2+480,535);x.stroke();
+  x.fillStyle='#5F6B67';x.font='400 30px "Segoe UI",Arial';
+  x.fillText('has successfully completed the examination for',W/2,600);
+  x.fillStyle='#1C2422';x.font='700 52px "Segoe UI",Arial';
+  x.fillText(r.exam,W/2,670);
+  x.fillStyle='#5F6B67';x.font='400 30px "Segoe UI",Arial';
+  x.fillText('with a score of',W/2,740);
+  /* score + badge */
+  x.fillStyle='#16A34A';x.font='800 76px "Segoe UI",Arial';
+  x.fillText(r.pct+'%',W/2,825);
+  /* PASSED badge */
+  x.fillStyle='#E7F6EC';roundRect(x,W/2-140,860,280,64,32);x.fill();
+  x.strokeStyle='#16A34A';x.lineWidth=3;roundRect(x,W/2-140,860,280,64,32);x.stroke();
+  x.fillStyle='#116B33';x.font='800 34px "Segoe UI",Arial';
+  x.fillText('P A S S E D',W/2,904);
+  /* gold seal */
+  drawSeal(x,W-330,H-330,120);
+  /* footer info */
+  x.textAlign='left';x.fillStyle='#5F6B67';x.font='400 26px "Segoe UI",Arial';
+  x.fillText('Date of issue',180,H-240);
+  x.fillStyle='#1C2422';x.font='700 32px "Segoe UI",Arial';
+  x.fillText(r.date,180,H-198);
+  x.fillStyle='#5F6B67';x.font='400 26px "Segoe UI",Arial';
+  x.fillText('Verification ID',180,H-140);
+  x.fillStyle='#1C2422';x.font='700 32px ui-monospace,Consolas,monospace';
+  x.fillText(r.vid,180,H-98);
+  x.textAlign='center';
+  x.fillStyle='#8A948F';x.font='400 22px "Segoe UI",Arial';
+  x.fillText('Sdmbrk Collections · Pass mark 70% · Verify using the ID above within the portal',W/2,H-60);
+}
+function roundRect(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+function drawSeal(x,cx,cy,R){
+  /* scalloped gold seal */
+  x.save();
+  var n=28;x.beginPath();
+  for(var i=0;i<=n*2;i++){var ang=i*Math.PI/n;var rr=(i%2===0)?R:R*0.9;x.lineTo(cx+rr*Math.cos(ang),cy+rr*Math.sin(ang));}
+  x.closePath();
+  var gr=x.createRadialGradient(cx-30,cy-30,10,cx,cy,R);
+  gr.addColorStop(0,'#E8CE7A');gr.addColorStop(0.6,'#C9A227');gr.addColorStop(1,'#9E7E17');
+  x.fillStyle=gr;x.fill();
+  x.beginPath();x.arc(cx,cy,R*0.74,0,Math.PI*2);x.strokeStyle='rgba(255,255,255,0.65)';x.lineWidth=3;x.stroke();
+  x.fillStyle='#5C4A0D';x.textAlign='center';
+  x.font='800 30px "Segoe UI",Arial';x.fillText('CERTIFIED',cx,cy-6);
+  x.font='700 20px "Segoe UI",Arial';x.fillText('70% PASS MARK',cx,cy+26);
+  /* ribbons */
+  x.fillStyle='#9E7E17';
+  x.beginPath();x.moveTo(cx-46,cy+R*0.8);x.lineTo(cx-26,cy+R+74);x.lineTo(cx-6,cy+R+50);x.lineTo(cx-6,cy+R*0.8);x.closePath();x.fill();
+  x.beginPath();x.moveTo(cx+46,cy+R*0.8);x.lineTo(cx+26,cy+R+74);x.lineTo(cx+6,cy+R+50);x.lineTo(cx+6,cy+R*0.8);x.closePath();x.fill();
+  x.restore();
+}
+function certPdf(cv,r){
+  function make(){
+    var pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    pdf.addImage(cv.toDataURL('image/jpeg',0.93),'JPEG',0,0,297,210);
+    pdf.save('Certificate_'+r.vid+'.pdf');
+  }
+  if(window.jspdf){make();return;}
+  var s=el('script',{src:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'});
+  s.onload=make;
+  s.onerror=function(){toast('Offline — downloading PNG instead');var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});a.click();};
+  document.head.appendChild(s);
+}
+
+/* ============ boot ============ */
+load();
+document.getElementById('admbtn').addEventListener('click',admToggle);
+document.getElementById('brandhome').addEventListener('click',vDash);
+refreshAdm();
+vDash();
+</script>
+</body>
+</html>
