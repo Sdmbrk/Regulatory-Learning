@@ -19,7 +19,6 @@ body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;back
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font:inherit;color:var(--ink)}
 .wrap{max-width:1100px;margin:0 auto;padding:0 16px 80px}
-/* header */
 header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
 .hbar{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
 .brand{display:flex;flex-direction:column;line-height:1.15;cursor:pointer}
@@ -28,7 +27,6 @@ header{background:var(--surface);border-bottom:1px solid var(--line);position:st
 .hspace{flex:1}
 .adm-pill{font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
 .adm-pill.on{background:var(--teal);border-color:var(--teal);color:#fff}
-/* generic */
 .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-weight:700;margin:26px 0 6px}
 h1.page{font-size:26px;font-weight:750;letter-spacing:-.01em}
 h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
@@ -52,7 +50,6 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
-/* dashboard cards */
 .catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:14px}
 .catcard{padding:20px;display:flex;flex-direction:column;gap:8px;min-height:170px;position:relative;overflow:hidden;cursor:pointer;transition:.15s}
 .catcard:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(28,36,34,.12)}
@@ -66,11 +63,9 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .tag-ph{background:#EEF1EF;color:var(--muted)}
 .catcard.addnew{border-style:dashed;align-items:center;justify-content:center;color:var(--muted);font-weight:600;opacity:.9}
 .catcard.addnew:hover{color:var(--teal);border-color:var(--teal)}
-/* tabs */
 .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:18px 0 18px;overflow-x:auto}
 .tab{padding:10px 16px;font-weight:600;font-size:14px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
 .tab.on{color:var(--teal);border-color:var(--teal)}
-/* doc list */
 .doclist{display:flex;flex-direction:column;gap:10px}
 .docrow{display:flex;align-items:center;gap:14px;padding:14px 16px}
 .docrow .dico{width:38px;height:38px;border-radius:9px;background:var(--red-soft);color:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0}
@@ -79,10 +74,15 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .docrow .dsp{flex:1}
 .viewerbox{margin-top:14px}
 .viewerbox iframe{width:100%;height:72vh;border:1px solid var(--line);border-radius:var(--r);background:#fff}
-/* study */
 .studysec{padding:18px 20px;margin-bottom:14px}
-.studysec h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
+.studysec h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
 .studysec .snum{width:26px;height:26px;border-radius:7px;background:var(--teal);color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.studysec .stitle{flex:1}
+.studysec .chev{color:var(--teal);font-size:14px;transition:.2s;flex-shrink:0}
+.coverimg{max-width:100%;border-radius:9px;border:1px solid var(--line);margin-top:12px;display:block}
+.togbar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:9px;border:1.5px dashed var(--line);border-radius:9px;color:var(--teal);font-weight:600;font-size:13.5px;transition:.15s}
+.togbar:hover{border-color:var(--teal);background:var(--teal-soft)}
+.secbody{margin-top:4px}
 .notes{margin-top:10px;font-size:14.5px}
 .notes h4{font-size:14px;font-weight:700;margin:14px 0 4px;color:var(--teal-dk)}
 .notes ul{padding-left:20px;margin:6px 0}
@@ -91,9 +91,13 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .notes table{border-collapse:collapse;margin:10px 0;width:100%;font-size:13.5px}
 .notes th{background:var(--teal-soft);text-align:left}
 .notes th,.notes td{border:1px solid var(--line);padding:7px 10px}
-.notes img{max-width:100%;border-radius:9px;border:1px solid var(--line);margin:8px 0}
+.notes img{max-width:100%;border-radius:9px;border:1px solid var(--line);margin:8px 0;display:block}
 .notes .warnbox{background:var(--amber-soft);border-left:3px solid var(--gold);padding:9px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:13.5px}
-/* exam */
+.imggal{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.imggal .thumb{position:relative}
+.imggal img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.imggal .rm{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.imggal .tag{position:absolute;bottom:3px;left:3px;background:rgba(28,36,34,.75);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px}
 .qwrap{max-width:720px;margin:0 auto}
 .qprog{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0}
 .qprog i{display:block;height:100%;background:var(--teal);transition:.3s;border-radius:99px}
@@ -110,7 +114,6 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .qdot{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--muted);background:#fff}
 .qdot.ans{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-dk)}
 .qdot.cur{outline:2px solid var(--teal)}
-/* result */
 .result{max-width:640px;margin:30px auto;text-align:center;padding:36px 26px}
 .scorering{width:150px;height:150px;margin:0 auto 16px;position:relative}
 .scorering svg{transform:rotate(-90deg)}
@@ -127,24 +130,21 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .rvq .rq{font-weight:650;margin-bottom:5px}
 .rvq .ra{font-size:13.5px;margin:2px 0}
 .rvq .expl{font-size:13px;color:var(--muted);margin-top:6px;background:var(--bg);padding:8px 10px;border-radius:8px}
-/* modal */
 .mback{position:fixed;inset:0;background:rgba(20,26,24,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:24px}
 .modal h3{font-size:18px;font-weight:700;margin-bottom:14px}
 .modal.wide{max-width:900px}
-/* admin */
 .admbox{padding:18px 20px;margin-bottom:16px}
 .admbox h3{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .qbrow{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13.5px}
 .qbrow .qbq{flex:1;font-weight:600}
 .qbrow .qbmeta{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:2px}
-.pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--teal-soft);color:var(--teal-dk)}
 .emptybox{padding:34px 20px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:var(--r);font-size:14px}
-/* cert modal */
 .certprev{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
 .crumb{font-size:13px;color:var(--muted);margin-top:18px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .crumb b{color:var(--ink)}
 .crumb button{color:var(--teal);font-weight:600}
+.hint{font-size:12.5px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-family:ui-monospace,Consolas,monospace;word-break:break-word}
 footer.app{max-width:1100px;margin:0 auto;padding:26px 16px;color:var(--muted);font-size:12.5px;text-align:center;border-top:1px solid var(--line)}
 @media(max-width:640px){
   h1.page{font-size:21px}
@@ -164,10 +164,9 @@ footer.app{max-width:1100px;margin:0 auto;padding:26px 16px;color:var(--muted);f
   <button class="adm-pill" id="admbtn">Admin: OFF</button>
 </div></header>
 <div class="wrap" id="app"></div>
-<footer class="app">Regulatory Learning &amp; Certification Portal · Pass mark 70% · Built for site & office use · <b>Sdmbrk Collections</b></footer>
+<footer class="app">Regulatory Learning &amp; Certification Portal · Pass mark 70% · Built for site &amp; office use · <b>Sdmbrk Collections</b></footer>
 <div class="toast" id="toast"></div>
 <script>
-/* ============ helpers ============ */
 function el(tag,attrs,kids){var n=document.createElement(tag);attrs=attrs||{};
 for(var k in attrs){if(k==='cls')n.className=attrs[k];else if(k==='text')n.textContent=attrs[k];else if(k==='html')n.innerHTML=attrs[k];else if(k.slice(0,2)==='on')n.addEventListener(k.slice(2),attrs[k]);else if(k==='style')n.setAttribute('style',attrs[k]);else n.setAttribute(k,attrs[k]);}
 (kids||[]).forEach(function(c){if(c==null)return;n.appendChild(typeof c==='string'?document.createTextNode(c):c);});return n;}
@@ -176,26 +175,38 @@ function btn(label,cls,fn){return el('button',{cls:'btn '+(cls||''),onclick:fn,t
 function mount(node){var a=document.getElementById('app');a.innerHTML='';a.appendChild(node);window.scrollTo(0,0);}
 var toastT=null;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2600);}
-function armBtn(b,fn,label){ // two-tap destructive confirm
+function armBtn(b,fn,label){
   var armed=false,timer=null;
   b.addEventListener('click',function(){
     if(!armed){armed=true;b.classList.add('armed');b.textContent='Tap again to confirm';timer=setTimeout(function(){armed=false;b.classList.remove('armed');b.textContent=label;},3500);}
     else{clearTimeout(timer);fn();}
   });return b;}
 function uid(){return Math.random().toString(36).slice(2,8).toUpperCase();}
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function fmtBytes(b){return b>1048576?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';}
 function todayStr(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});}
+function secImgs(s){return s.imgs||(s.img?[s.img]:[]);}
 
-/* ============ state (localStorage) ============ */
 var LS='rlcp_v1';
 var S=null;
-function save(){localStorage.setItem(LS,JSON.stringify(S));}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){toast('Save failed — storage may be full (large images). Remove some images.');}}
 function load(){
   try{S=JSON.parse(localStorage.getItem(LS));}catch(e){S=null;}
-  if(!S){S=seedState();save();}
+  if(!S){S=seedState();S.ver=3;save();return;}
+  if(!S.ver||S.ver<2){
+    var dc=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc=c;});
+    if(dc){
+      dc.sections=dc.sections.filter(function(s){return s.title!=='DBC Overview & Applicability';});
+      var pa=seedPartA();
+      for(var i=pa.length-1;i>=0;i--)dc.sections.unshift(pa[i]);
+    }
+    S.ver=2;
+  }
+  if(S.ver<3){
+    S.cats.forEach(function(c){(c.sections||[]).forEach(function(s){if(!s.imgs)s.imgs=s.img?[s.img]:[];});});
+    S.ver=3;
+  }
+  save();
 }
-/* ============ IndexedDB for PDFs ============ */
 var idb=null;
 function idbOpen(cb){
   if(idb)return cb(idb);
@@ -208,20 +219,15 @@ function pdfPut(rec,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readw
 function pdfGet(id,cb){idbOpen(function(db){var rq=db.transaction('pdfs').objectStore('pdfs').get(id);rq.onsuccess=function(){cb(rq.result);};});}
 function pdfDel(id,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').delete(id);tx.oncomplete=cb;});}
 
-/* ============ seed data: Dubai Codes ============ */
 function seedState(){
   return {
     adminPass:'sdmbrk', adminOn:false,
-    results:[], // {id,cat,exam,name,score,total,pct,pass,date,vid}
+    results:[],
     cats:[
       { id:'dubai-codes', name:'Dubai Codes', icon:'🏗️', active:true,
-        desc:'Dubai Building Code (DBC) — study notes, reference documents and certification exam.',
-        docs:[], // {id,name,size}
-        sections: seedSections(),
-        questions: seedQuestions(),
-        examName:'Dubai Building Code Certification',
-        quizCount:20
-      },
+        desc:'Dubai Building Code (DBC 2021) — study notes, reference documents and certification exam.',
+        docs:[], sections: seedPartA().concat(seedSections()), questions: seedQuestions(),
+        examName:'Dubai Building Code Certification', quizCount:20 },
       { id:'dewa', name:'DEWA Regulations', icon:'⚡', active:false,
         desc:'DEWA Regulations for Electrical Installations — coming soon.',
         docs:[],sections:[],questions:[],examName:'DEWA Regulations Certification',quizCount:20},
@@ -231,45 +237,87 @@ function seedState(){
     ]
   };
 }
+function seedPartA(){
+ return [
+ {id:uid(),title:'Part A §A.1 — Objectives & Basis of the DBC (2021)',imgs:[],notes:
+"## What the DBC is for\n- Unifies building design regulation across all of Dubai under one code, replacing the fragmented authority-by-authority system.\n- Sets MINIMUM requirements only — nothing stops a design exceeding them.\n## The four mandated objectives\n- Health, safety, welfare and convenience of people IN and AROUND buildings.\n- Same protection for people who might be AFFECTED by buildings (neighbours, public).\n- Reducing building impact on the surrounding environment.\n- Sustainable development of buildings.\n## Where its content came from\n- Existing regulations from the various Authorities and Service Providers.\n- Stakeholder interviews (Authorities, Service Providers, Master Developers, Consultants) to find gaps and inconsistencies.\n- Benchmarking against international and regional codes.\n- Arranged by THEMES (Parts) to integrate all elements of building design.\n!! Exam trap: DBC = minimum requirements. Higher standards are always permitted."},
+ {id:uid(),title:'Part A §A.2 — Key Definitions',imgs:[],notes:
+"## People & entities\n- Architect / Engineer / Civil Engineer: person in charge of design or supervision AND licensed to practise in Dubai under applicable legislation.\n- Consultant: gives consulting advice during design or construction; licensed in Dubai.\n- Contractor: carries out construction works; licensed for contracting in Dubai.\n- Developer: prepares land, constructs buildings, creates subdivisions, rehabilitates buildings.\n- Owner: anyone with legal/equitable interest registered as owner — includes long-term leaseholders and the Main/Sub-Developer for unsold units.\n- Authority: any ministry, department or government institution connected to implementing the DBC.\n## Works on existing buildings (know the ladder!)\n| Term | Meaning |\n| Renovation | Linings/finishes change or structural strengthening — NO internal reconfiguration |\n| Modification | Fit-out of a space/unit, or change to a service system or building element |\n| Reconstruction | Modification that is NOT standalone — affects adjacent egress/systems, larger part may need closing |\n| Change of use | New occupancy different from original design |\n| Addition | Increase in gross/built-up area, height or depth |\n## Dwellings\n- Villa: separate building on its own plot, all floors for ONE family, independent parking + external open space.\n- Townhouse: multiple villas connected by one or more walls in a series.\n## Design approaches\n- Prescriptive design: meets the written requirements entirely.\n- Performance-based design: follows prescriptive route but substitutes alternative solution(s) equal or better for some aspect(s).\n## Spaces\n- Habitable space: living/sleeping/eating with continuous occupancy. Bathrooms, closets, halls, storage, utility = NOT habitable.\n- Occupiable space: enclosed space where people congregate (amusement, labour, education).\n!! Renovation vs Modification vs Reconstruction is a favourite consultant/exam distinction — memorise the ladder."},
+ {id:uid(),title:'Part A §A.3 — References, Acronyms & Verbal Forms',imgs:[],notes:
+"## Essential cross-references (Ref. A.1–A.7)\n- UAE Fire & Life Safety Code of Practice 2018 (UAE FLSC) — Ministry of Interior Civil Defence. THE fire companion to the DBC.\n- Dubai Universal Design Code 2017 — accessibility.\n- DHA regulations + DHA Health Facility Guidelines — healthcare design.\n- DTCM hotel classification criteria — star ratings.\n- DCAA no-objection certificate — buildings in aviation easement areas (above and below 300 m).\n- UK CDM Regulations 2015 — reference for safe-by-design principles.\n## Verbal forms — MANDATORY knowledge\n| Word | Meaning in DBC |\n| Shall | Mandatory |\n| Should | Recommended |\n| May | Permitted |\n## Acronyms worth memorising\n- DM (Dubai Municipality), DDA, Trakhees, DSOA — planning authorities replaced/unified by DBC.\n- DEWA, IACAD — incorporated or cross-referenced.\n- SIRA (security, Part J), TRA (telecom, G.11), RTA (right of way), DCAA (heights), KHDA (education licensing).\n- FAR, GFA, GA, NA — area terms. DLTM — Dubai Local Transverse Mercator. BIM, MEP.\n!! Shall / should / may distinctions decide what is enforceable. 'Shall' lines are the exam material."},
+ {id:uid(),title:'Part A §A.4 — Relationship to Other Regulations & Hierarchy',imgs:[],notes:
+"## What the DBC replaces vs keeps\n- REPLACES building-design regulations of DM, DDA, Trakhees and DSOA.\n- INCORPORATES or cross-references DEWA and IACAD requirements.\n- SUMMARISES SIRA security rules (Part J); follows TRA federal telecom rules (G.11).\n- UAE FLSC remains in force — cross-referenced throughout.\n- Accessibility parts of Dubai Universal Design Code absorbed into Part C.\n- DHA + federal rules still govern healthcare facilities; DTCM sets hotel star criteria (DBC compliance ≠ star rating — consult DTCM early).\n- KHDA / Ministry of Education license schools but give no separate design rules.\n- RTA (right of way) and DCAA (flight-path height limits) still apply.\n- Planning/development regulations by developers or planning authorities are NOT replaced; DBC Part B planning rules apply only where plot-specific DCR is unavailable.\n## International codes\n- DBC relies mainly on BS EN and American codes — use LATEST edition unless the DBC pins an edition (e.g. ASCE/SEI 7-2016 in structures).\n- An edition is pinned either because cross-references are version-specific or because that edition was reviewed for Dubai.\n## Hierarchy (A.4.3)\n- DBC + UAE FLSC together = the main regulations for building design in Dubai.\n- Then SIRA (security), TRA (telecom), essential references in each Part.\n- 'Further reading' lists are informative only — not requirements.\n- Conflict between DBC and referenced codes → MOST RESTRICTIVE / highest performance wins.\n- Conflict between a general and a specific DBC requirement → SPECIFIC wins.\n## Safe by design (A.4.4)\n- Consultant addresses health & safety across the whole building lifecycle (contractors, maintenance, occupants, visitors, demolition).\n- Documented in a RISK REGISTER: acknowledge risk → investigate mitigation → design solution reducing risk to practicable level.\n- NOT mandated in the first edition, but expected to be enforced in future revisions.\n!! Two conflict rules — most restrictive between codes; specific over general within the DBC. Both are classic exam questions."},
+ {id:uid(),title:'Part A §A.5 — Scope, Occupancies & Exclusions',imgs:[],notes:
+"## Applies to\n- New buildings, plus changes to existing buildings: renovation, modification, reconstruction, change of use, addition — DBC + UAE FLSC apply to the changed area and anything impacted by it.\n- For an ADDITION relying on the existing building for escape/vertical transport, the EXISTING building must also be assessed.\n## Occupancy classes (Table A.2)\n- Assembly, Business, Educational, Hotel establishment, Residential (incl. villas & townhouses), Parking, Retail, Mall, Industrial, Storage.\n## DBC does NOT apply to\n- Infrastructure: bridges, tunnels, culverts, metro stations, hydraulic structures, buried/overhead utilities, power stations, antennas/masts, wind turbines, nuclear.\n- Marine structures: canals, dams, dikes, piers, jetties, wharves.\n- Oil & gas: petrochemical facilities, refineries, LNG terminals, platforms, tanks.\n- Temporary/support structures: tents, cranes, storage racks, scaffolding, formwork, falsework.\n- Special loading structures: stadia, grandstands, silos, chimneys.\n- Historical buildings keeping original character (follow relevant Authority guidelines).\n- Heritage buildings DO follow the DBC, but the heritage department controls elevation & façade.\n- Villas & townhouses: addressed in Part K.\n!! Heritage vs historical: heritage follows DBC (with façade control); historical is outside DBC. Easy marks."},
+ {id:uid(),title:'Part A §A.5.2 — Area & Height Definitions (GFA, Built-up, GA/NA)',imgs:[],notes:
+"## GFA (gross floor area)\n- Used by planning authorities: FAR = GFA ÷ plot area.\n- Sum of all floors measured to the exterior surface of external walls and centrelines of common walls; excludes cornices, brackets, façade cladding.\n- Consultants use the DBC definition + tables unless the DCR states GFA.\n## GFA quick memory table (condensed from Table A.3)\n| Included | Excluded |\n| Habitable/occupiable spaces + sanitary | Parking, parking lobbies, internal roads |\n| Mezzanines, lobbies, corridors, stairs | Mechanical/service rooms, ducts, MEP plant floors |\n| Elevator shaft at recall floor only | Elevator shafts other floors + machine rooms |\n| Basement habitable areas (non-villa) | Villa basements, storage below ground |\n| Storage on ground & above | Shafts, refuse chutes, waste rooms |\n| Base of double-height volumes/atria | Voids, floor voids, terraces, balconies |\n| Gym area beyond 50% of roof area | Gym ≤50% of roof area, pools + services, prayer/ablution, open arcades |\n## Built-up area\n- Total constructed area from external walls INCLUDING balconies, terraces, projections, covered parking, corridors, basements, service floors, indoor pools.\n- EXCLUDES: shafts/courtyards (incl. MEP shafts, refuse chutes), uncovered landscape/hardscape, lightweight shading (pergolas, standalone canopies).\n## GA and NA\n- Gross area (GA): inside perimeter of exterior walls; excludes shafts/courtyards; includes corridors, stairs, ramps, closets, atria bases, interior wall thickness. Used for occupant load.\n- Net area (NA): actual occupied area only — no corridors, stairs, ramps, toilets, mech rooms, closets.\n## Building height\n- Checked against DBC, DCR/affection plans, UAE FLSC and (in aviation easement areas) DCAA rules — each defines height slightly differently, so check ALL.\n!! Gym 50% rule applies to gyms anywhere in the building even though it references roof area."},
+ {id:uid(),title:'Part A §A.6–A.9 — Navigation, Adoption, Alternative Solutions, Maintenance',imgs:[],notes:
+"## Structure of the code (A.6)\n- Parts: A General · B Architecture · C Accessibility · D Vertical transportation · E Building envelope · F Structure · G Incoming utilities · H Indoor environment · J Security · K Villas.\n- Each Part opens with PERFORMANCE STATEMENTS (broad outcomes). Follow the prescriptive requirements → performance statements deemed met → Authority accepts.\n- Sustainability minimums embedded in relevant Parts; rating systems encouraged beyond minimum.\n- Each Part has its own definitions, essential references (enforceable) vs further reading (informative), and annexes (explanatory).\n## Adoption (A.7)\n- Final approved design already issued → DBC conformity NOT required.\n- In design without final approval → DBC applies.\n- DBC often LESS stringent than the old rules (non-HSE requirements removed) → benefit to adopt.\n## Alternative solutions (A.8)\n- Permitted when prescriptive requirements can't reasonably be met, or for existing-building changes where compliance cost is disproportionate.\n- Must meet performance-statement intent and give AT LEAST equivalent performance to ALL prescriptive requirements.\n- Applied HOLISTICALLY — a change in one Part must not degrade performance elsewhere.\n- For existing buildings: maintain current compliance level or improve toward DBC/FLSC.\n- The AUTHORITY decides acceptance; the CONSULTANT carries the burden of proof.\n- Alternative international standards allowed where Authority permits and intent is met.\n## Maintenance & housekeeping (A.9–A.11)\n- DBC is electronic/interactive; updated on a 2–3 year cycle with addendums between — always check you're on the latest version.\n- 2021 = first edition; future amendments will be side-lined in text.\n- Copyright: DBC content may not be copied, printed, sold or reproduced in any format.\n- Coordinate system: Dubai Local Transverse Mercator (DLTM); levelling reference = Port Rashid.\n!! Burden of proof for alternative solutions sits with the Consultant, decision with the Authority — never the Contractor."},
+ {id:uid(),title:'Part A §A.12 — Dimensions, Units & Calculations',imgs:[],notes:
+"## Dimensions (A.12.1)\n- Figures/diagrams: millimetres WITHOUT units, unless over 1,000 mm → then metres WITH units (m).\n- Not stated as max or min → the dimension is ABSOLUTE.\n- Conventional industry tolerances apply, except where a min–max range is explicitly stated.\n## Units (A.12.2)\n- All quantities metric, units defined.\n- Engineering in dynamically consistent units — either SI, mm-t-s, or mm-kg-ms systems.\n- Dimensions across analysis models, drawings and BIM must be fully coordinated and consistent.\n## Calculations (A.12.3)\n- Ratio/percentage calcs for required counts (parking, sanitary, etc.) that give fractions → ROUND UP to the next whole number. Always.\n!! Fractional results always round UP — 10.1 parking spaces means 11. Straight exam material."},
+ ];
+}
 function seedSections(){
  return [
- {id:uid(),title:'DBC Overview & Applicability',img:null,notes:
-"## Purpose & scope\n- The Dubai Building Code (DBC) sets minimum technical requirements for design and construction of buildings in the Emirate of Dubai.\n- Administered by Dubai Municipality; applies to new buildings, extensions and material alterations.\n- Works alongside (not instead of) authority regulations: DEWA, DCD (UAE Fire & Life Safety Code), DDA/Trakhees where applicable, and Dubai Municipality circulars.\n## Structure\n- Part A — General; Part B — Access & Circulation (incl. accessibility); Part C — Fire (defers to UAE FLS Code); Part D — Structure; Part E — Services (MEP); Part F — Environment / Al Sa'fat; Part G — Building Systems.\n!! On site: the most restrictive requirement between DBC and the authority code governs. Never assume DBC alone is sufficient for fire or utility matters."},
- {id:uid(),title:'Access, Egress & Accessibility (Part B)',img:null,notes:
+ {id:uid(),title:'Access, Egress & Accessibility (Part B)',imgs:[],notes:
 "## Key dimensional requirements (typical villa/residential)\n| Element | Minimum requirement |\n| Door clear width (habitable rooms) | 800 mm clear |\n| Accessible entrance door | 850–900 mm clear |\n| Corridor width (dwelling) | 900 mm |\n| Stair riser (private stair) | max 190 mm |\n| Stair going (private stair) | min 250 mm |\n| Handrail height | 900–1000 mm above pitch line |\n| Guarding height (balconies) | min 1100 mm |\n- Guarding gaps must not allow a 100 mm sphere to pass (child safety).\n- Level thresholds (max 15 mm, chamfered) at accessible entrances.\n## Sanitary provision\n- At least one accessible WC on the entrance level of accessible dwellings.\n!! Balcony guarding on villas is a recurring consultant comment — verify 1100 mm from finished floor level after tiling, not from slab."},
- {id:uid(),title:'Structure & Materials (Part D)',img:null,notes:
-"## Design basis\n- Loads and combinations generally follow international standards adopted by DBC (dead, imposed, wind per local wind maps, seismic zoning for Dubai).\n- Durability: concrete cover and mix designed for hot, saline, sulphate-bearing ground conditions — typical severe exposure classes for foundations.\n## Practical site notes\n- Concrete in foundations commonly requires SRC or PC+GGBS/PFA blends with protective coatings + polythene separation per soil report.\n- Curing is critical in UAE summer: retain moisture minimum 7 days; avoid casting large pours in peak afternoon temperatures.\n!! Hot-weather concreting: max concrete temperature at placement is typically 32°C per specifications — check the project spec, plan ice/chilled water with the batching plant."},
- {id:uid(),title:'Building Services — Electrical & Mechanical (Part E)',img:null,notes:
-"## Electrical\n- Electrical installations must comply with DEWA Regulations for Electrical Installations (current edition) — DBC defers to DEWA.\n- Standard LV system: 400/230 V, 3-phase, 50 Hz, TN-S earthing per DEWA.\n- Cable sizing to IEC 60228 conductor classes; derate for 50°C ambient and grouping.\n- RCD protection (30 mA) required for socket circuits and wet areas.\n## Mechanical & plumbing\n- Ventilation rates, condensate drainage and fresh-air provision per DBC Part E and Dubai Municipality requirements.\n- Water supply and drainage per DM / ADSSC-aligned standards; backflow prevention on connections to potable water.\n!! Condensate drains from FCUs must be trapped and routed with fall — untrapped condensate lines are a classic snag causing ceiling stains that get mistaken for leaks."},
- {id:uid(),title:'Fire Safety Interface (Part C → UAE FLS Code)',img:null,notes:
-"## Division of responsibility\n- DBC Part C points to the UAE Fire & Life Safety Code of Practice (DCD) for fire matters: compartmentation, escape distances, fire-rated doors, detection & alarm, firefighting systems.\n## Villa-level essentials\n- Smoke detectors in bedrooms, corridors and living areas connected to a home alarm panel.\n- Kitchen: heat detector (not smoke) to avoid nuisance alarms.\n- Fire-rated door and self-closer where garage connects to dwelling.\n- LPG cylinders: outdoor ventilated enclosure, piping per DCD requirements.\n!! Any deviation on fire systems needs DCD approval — municipality approval alone does not cover fire."},
+ {id:uid(),title:'Structure & Materials (Part F)',imgs:[],notes:
+"## Design basis\n- Loads and combinations generally follow international standards adopted by DBC (dead, imposed, wind per local wind maps, seismic zoning for Dubai). Part F mandates ASCE/SEI 7-2016.\n- Durability: concrete cover and mix designed for hot, saline, sulphate-bearing ground conditions — typical severe exposure classes for foundations.\n## Practical site notes\n- Concrete in foundations commonly requires SRC or PC+GGBS/PFA blends with protective coatings + polythene separation per soil report.\n- Curing is critical in UAE summer: retain moisture minimum 7 days; avoid casting large pours in peak afternoon temperatures.\n!! Hot-weather concreting: max concrete temperature at placement is typically 32°C per specifications — check the project spec, plan ice/chilled water with the batching plant."},
+ {id:uid(),title:'Building Services — Electrical & Mechanical (Parts G/H)',imgs:[],notes:
+"## Electrical\n- Electrical installations must comply with DEWA Regulations for Electrical Installations (current edition) — DBC incorporates/cross-references DEWA.\n- Standard LV system: 400/230 V, 3-phase, 50 Hz, TN-S earthing per DEWA.\n- Cable sizing to IEC 60228 conductor classes; derate for 50°C ambient and grouping.\n- RCD protection (30 mA) required for socket circuits and wet areas.\n- Telecom rules per TRA, documented in G.11.\n## Mechanical & plumbing\n- Ventilation rates, condensate drainage and fresh-air provision per DBC Part H and Dubai Municipality requirements.\n- Water supply and drainage per DM / ADSSC-aligned standards; backflow prevention on connections to potable water.\n!! Condensate drains from FCUs must be trapped and routed with fall — untrapped condensate lines are a classic snag causing ceiling stains that get mistaken for leaks."},
+ {id:uid(),title:'Fire Safety Interface (UAE FLS Code)',imgs:[],notes:
+"## Division of responsibility\n- The DBC cross-references the UAE Fire & Life Safety Code of Practice (DCD/Ministry of Interior) for fire matters: compartmentation, escape distances, fire-rated doors, detection & alarm, firefighting systems. Together they form the main building-design regulations.\n## Villa-level essentials\n- Smoke detectors in bedrooms, corridors and living areas connected to a home alarm panel.\n- Kitchen: heat detector (not smoke) to avoid nuisance alarms.\n- Fire-rated door and self-closer where garage connects to dwelling.\n- LPG cylinders: outdoor ventilated enclosure, piping per DCD requirements.\n!! Any deviation on fire systems needs DCD approval — municipality approval alone does not cover fire."},
  ];
 }
 function seedQuestions(){
  function q(sec,txt,opts,c,ex){return{id:uid(),sec:sec,q:txt,opts:opts,c:c,ex:ex};}
- var A='DBC Overview & Applicability',B='Access, Egress & Accessibility (Part B)',D='Structure & Materials (Part D)',E='Building Services — Electrical & Mechanical (Part E)',F='Fire Safety Interface (Part C → UAE FLS Code)';
+ var A='Part A — General',B='Access, Egress & Accessibility (Part B)',D='Structure & Materials (Part F)',E='Building Services — Electrical & Mechanical (Parts G/H)',F='Fire Safety Interface (UAE FLS Code)';
  return [
  q(A,'Which authority administers the Dubai Building Code?',['DEWA','Dubai Municipality','Dubai Civil Defense','RTA'],1,'The DBC is issued and administered by Dubai Municipality.'),
- q(A,'When DBC and an authority code (e.g., UAE FLS Code) give different requirements, which applies?',['Always the DBC','Always the authority code','The more restrictive requirement','Whichever the contractor prefers'],2,'The most restrictive requirement between applicable codes governs.'),
- q(A,'Fire and life safety requirements in Dubai are primarily governed by which document?',['DBC Part D','UAE Fire & Life Safety Code of Practice','IEC 60228','Al Sa\'fat manual'],1,'DBC Part C defers to the UAE FLS Code administered by DCD.'),
- q(A,'Al Sa\'fat relates to which aspect of building regulation in Dubai?',['Structural loading','Green building / sustainability rating','Elevator safety','Road access'],1,'Al Sa\'fat is Dubai\'s green building evaluation system.'),
- q(A,'The DBC applies to which of the following?',['Only government buildings','Only high-rise towers','New buildings, extensions and material alterations','Temporary site offices only'],2,'DBC covers new construction plus extensions and material alterations.'),
+ q(A,'When the DBC and a referenced code give different requirements, which applies?',['Always the DBC','Always the referenced code','The most restrictive / highest performance requirement','Whichever the contractor prefers'],2,'Conflicts between DBC and reference codes are resolved by the most restrictive requirement (A.4.3).'),
+ q(A,'When a general DBC requirement conflicts with a specific DBC requirement, which governs?',['The general requirement','The specific requirement','The Authority chooses','Neither applies'],1,'Specific requirements override general ones within the DBC (A.4.3).'),
+ q(A,'In the DBC, the word "shall" means the associated text is:',['Recommended','Permitted','Mandatory','Optional'],2,'Shall = mandatory; should = recommended; may = permitted (A.3.2).'),
+ q(A,'In the DBC, the word "should" means the associated text is:',['Mandatory','Recommended','Permitted','Prohibited'],1,'Should = recommended (A.3.2).'),
+ q(A,'The DBC together with which document forms the main regulations for building design in Dubai?',['Dubai Universal Design Code','UAE Fire and Life Safety Code of Practice','ASCE/SEI 7','DTCM classification criteria'],1,'DBC + UAE FLSC together form the main regulations (A.4.3).'),
+ q(A,'A change to linings/finishes or strengthening of structure with no internal reconfiguration is a:',['Modification','Renovation','Reconstruction','Change of use'],1,'Renovation = finishes/strengthening without reconfiguration (A.2).'),
+ q(A,'A fit-out of a space or unit, or a change to a service system, is defined as a:',['Renovation','Addition','Modification','Reconstruction'],2,'Modification = fit-out or change to a service system/building element (A.2).'),
+ q(A,'A modification that affects adjacent egress routes so a larger part of the building may need closing is a:',['Renovation','Reconstruction','Addition','Change of use'],1,'Reconstruction is not standalone — it impacts adjacent egress/systems (A.2).'),
+ q(A,'Which of the following is OUTSIDE the scope of the DBC?',['A new hotel','A villa addition','A road bridge','A warehouse'],2,'Infrastructure like road and rail bridges is excluded from DBC scope (A.5.1).'),
+ q(A,'Historical buildings where original character is retained:',['Must fully comply with DBC','Follow the relevant Authority guidelines instead of the DBC','Need DCAA approval','Are treated as heritage buildings'],1,'The DBC does not apply to historical buildings; Authority guidelines govern (A.5.1).'),
+ q(A,'Heritage buildings in Dubai:',['Are exempt from the DBC','Follow the DBC, with elevation/façade controlled by the heritage department','Only follow UAE FLSC','Have no façade control'],1,'Heritage buildings follow DBC; the heritage department controls elevation design and façade (A.5.1).'),
+ q(A,'Villas and townhouses are addressed in which Part of the DBC?',['Part B','Part F','Part J','Part K'],3,'Part K covers villas and townhouses.'),
+ q(A,'FAR is defined as the ratio of:',['Net area to plot area','GFA to plot area','Built-up area to GFA','Plot area to GFA'],1,'Floor area ratio = GFA ÷ plot area (A.5.2.1).'),
+ q(A,'Which of these is INCLUDED in GFA?',['Parking','Villa basements','Mezzanine floors','Balconies'],2,'Mezzanines, lobbies, corridors and stairs are included; parking, villa basements and balconies are excluded (Table A.3).'),
+ q(A,'Elevator shafts count toward GFA:',['On every floor','Only at the elevator recall floor','Never','Only in villas'],1,'Only the shaft at the recall floor is included (Table A.3).'),
+ q(A,'A gym in a building is excluded from GFA when its gross area is:',['Any size','≤50% of the roof area','≤25% of plot area','Always included'],1,'Gym ≤50% of roof area is excluded; the excess over 50% is included, wherever the gym is located (Table A.3).'),
+ q(A,'Which is EXCLUDED from built-up area calculation?',['Balconies','Covered parking','Standalone pergolas','Indoor swimming pools'],2,'Lightweight outdoor shading such as pergolas and standalone canopies is excluded (A.5.2.2).'),
+ q(A,'Gross area (GA) and net area (NA) are used by the DBC to calculate:',['FAR','Occupant load','Plot coverage','Setbacks'],1,'GA and NA feed occupant load calculations (A.5.2.3).'),
+ q(A,'Net area (NA) excludes which of the following?',['Bedrooms','Offices','Corridors and stairways','Retail floor space'],2,'NA is occupied area only — corridors, stairs, ramps, toilets, mech rooms and closets are out (A.2).'),
+ q(A,'Projects with a final approved design from the Authority:',['Must be redesigned to the DBC','Do not need to conform to the DBC','Need DCD re-approval','Lose their approval'],1,'Final approved designs are grandfathered; designs without final approval must conform (A.7).'),
+ q(A,'An alternative solution under A.8 must provide:',['Lower cost only','At least equivalent performance to all prescriptive requirements','Contractor sign-off','A new plot survey'],1,'It must meet the performance-statement intent and equal or exceed all prescriptive requirements.'),
+ q(A,'Who decides whether a performance-based design is equivalent, and who must demonstrate it?',['Consultant decides; Authority demonstrates','Authority decides; Consultant demonstrates','Contractor decides; Owner demonstrates','DEWA decides; DM demonstrates'],1,'The Authority decides; the burden of proof is on the Consultant (A.8).'),
+ q(A,'The DBC is typically maintained and updated on what cycle?',['Annually','Every 2–3 years','Every 10 years','Never'],1,'Two- to three-year cycle with addendums in between (A.9.1).'),
+ q(A,'The coordinate system used by the Authority is:',['WGS84','Dubai Local Transverse Mercator (DLTM)','UTM Zone 40','Port Rashid Grid'],1,'DLTM is the coordinate system; Port Rashid is the levelling reference (A.11).'),
+ q(A,'In DBC figures, dimensions are shown in millimetres without units unless the distance exceeds:',['500 mm','1,000 mm','2,000 mm','10,000 mm'],1,'Over 1,000 mm, dimensions switch to metres with units (A.12.1).'),
+ q(A,'A parking calculation yields 14.2 required spaces. How many must be provided?',['14','15','14.5','Authority decides'],1,'Fractions round UP to the next whole number (A.12.3).'),
+ q(A,'International codes referenced by the DBC are used in:',['The 2016 edition always','Their latest edition unless the DBC pins an edition','Any edition the consultant prefers','The first edition only'],1,'Latest edition applies except where the DBC mandates a specific one, e.g. ASCE/SEI 7-2016 (A.4.2).'),
+ q(A,'"Safe by design" in the first edition of the DBC is:',['Mandatory','Not mandated but likely enforced in future revisions','Only for villas','A DEWA requirement'],1,'A.4.4: not mandated in the first edition; consultants should familiarise via CDM Regulations.'),
+ q(A,'DBC planning regulations in Part B are followed:',['Always','Only where plot-specific development regulations are unavailable','Only for villas','Never'],1,'Plot-specific DCR from developers/planning authorities takes precedence (A.4.1).'),
  q(B,'Minimum clear width for a door to a habitable room in a dwelling is typically:',['600 mm','700 mm','800 mm','1000 mm'],2,'800 mm clear opening is the typical minimum for habitable room doors.'),
  q(B,'Minimum guarding (balustrade) height at a villa balcony is:',['900 mm','1000 mm','1100 mm','1200 mm'],2,'External balconies require minimum 1100 mm guarding, measured from finished floor level.'),
  q(B,'Openings in guarding must not allow passage of a sphere of diameter:',['50 mm','100 mm','150 mm','200 mm'],1,'The 100 mm sphere rule prevents children passing through or becoming trapped.'),
  q(B,'For a private stair within a dwelling, the maximum riser is typically:',['150 mm','170 mm','190 mm','220 mm'],2,'Private stairs: max riser 190 mm with min going 250 mm.'),
  q(B,'Handrail height above the stair pitch line should be within:',['700–800 mm','800–900 mm','900–1000 mm','1100–1200 mm'],2,'Handrails are fixed 900–1000 mm above the pitch line / landing floor.'),
- q(B,'Maximum threshold height at an accessible entrance (chamfered) is:',['15 mm','25 mm','40 mm','50 mm'],0,'Accessible thresholds are limited to 15 mm and should be chamfered.'),
  q(B,'Guarding height must be verified from:',['Structural slab level','Finished floor level','Top of skirting','Underside of ceiling'],1,'Measure from FFL after floor finishes — tiling reduces effective guarding height.'),
  q(D,'Concrete durability design in Dubai foundations must primarily address:',['Freeze–thaw cycles','Sulphate and chloride attack from soil/groundwater','Volcanic activity','Timber decay'],1,'Hot saline, sulphate-bearing ground drives durability requirements (SRC/GGBS mixes, coatings).'),
  q(D,'Typical maximum concrete temperature at placement in UAE hot-weather specifications is:',['25°C','32°C','40°C','45°C'],1,'32°C at placement is the common specification limit — plan chilled water/ice with the plant.'),
  q(D,'Minimum recommended moist curing period for structural concrete on site is:',['1 day','3 days','7 days','21 days'],2,'Retain moisture for at least 7 days; more critical in UAE summer.'),
- q(D,'GGBS or PFA is blended into foundation concrete mainly to:',['Speed up setting','Improve resistance to sulphate/chloride attack','Reduce cement cost only','Add colour'],1,'Supplementary cementitious materials improve durability in aggressive ground.'),
- q(E,'Electrical installations under the DBC must comply with:',['NEC (US)','DEWA Regulations for Electrical Installations','BS 7671 only','Contractor\'s method statement'],1,'DBC Part E defers electrical work to DEWA Regulations.'),
+ q(D,'Part F of the DBC mandates which edition of ASCE/SEI 7?',['2010','2016','2022','No edition mandated'],1,'A.4.2 cites Part F mandating ASCE/SEI 7-2016 as an example of a pinned edition.'),
+ q(E,'Electrical installations under the DBC must comply with:',['NEC (US)','DEWA Regulations for Electrical Installations','BS 7671 only','Contractor\'s method statement'],1,'DBC incorporates/cross-references DEWA Regulations for electrical work.'),
  q(E,'The standard DEWA low-voltage 3-phase supply is:',['220/110 V, 60 Hz','380/220 V, 60 Hz','400/230 V, 50 Hz','415/240 V, 50 Hz'],2,'Dubai LV system is 400/230 V, 3-phase, 50 Hz.'),
  q(E,'Cable current ratings on Dubai sites are derated for an ambient temperature of:',['30°C','35°C','45°C','50°C'],3,'50°C ambient is the standard design assumption per DEWA practice.'),
  q(E,'RCD protection at 30 mA is required for:',['Lighting circuits only','Socket-outlet circuits and wet areas','Fixed AC units only','Earthing conductors'],1,'30 mA RCDs protect socket circuits and locations with water risk.'),
- q(E,'Conductor classes for cables are defined in which standard?',['IEC 60228','IEC 60034','ISO 9001','ASTM C150'],0,'IEC 60228 defines conductor classes (1 solid, 2 stranded, 5 flexible).'),
+ q(E,'Telecommunications design in the DBC follows federal regulations of:',['SIRA','TRA','RTA','KHDA'],1,'TRA federal telecom regulations are documented in G.11.'),
  q(E,'FCU condensate drain lines must be:',['Run without slope','Trapped and laid to fall','Connected directly to soil stack without trap','Left open above ceiling'],1,'Untrapped or flat condensate lines cause ceiling staining that mimics leaks.'),
  q(F,'Which detector type is recommended in villa kitchens?',['Ionisation smoke detector','Optical smoke detector','Heat detector','Beam detector'],2,'Heat detectors avoid nuisance alarms from cooking fumes.'),
  q(F,'A door between an attached garage and the dwelling must be:',['Standard hollow-core','Fire-rated with self-closer','Sliding glass','Louvred'],1,'Garage-to-dwelling doors are fire-rated and self-closing.'),
@@ -277,14 +325,19 @@ function seedQuestions(){
  q(F,'Changes to fire alarm or firefighting systems require approval from:',['Dubai Municipality only','The main contractor','Dubai Civil Defense','DEWA'],2,'Fire system deviations need DCD approval — DM approval does not cover fire.'),
  ];
 }
-</script>
-<script>
-/* ============ mini markdown for notes ============ */
-function renderNotes(txt){
+
+function renderNotes(txt,imgs){
+  imgs=imgs||[];
   var box=div('notes'),lines=String(txt||'').split('\n'),i=0;
   while(i<lines.length){
     var L=lines[i];
-    if(/^\|/.test(L)){ // table
+    var im=L.match(/^\[img:(\d+)\]\s*$/);
+    if(im){
+      var idx=parseInt(im[1])-1;
+      if(imgs[idx])box.appendChild(el('img',{src:imgs[idx],alt:'figure '+im[1]}));
+      i++;continue;
+    }
+    if(/^\|/.test(L)){
       var rows=[];while(i<lines.length&&/^\|/.test(lines[i])){rows.push(lines[i].replace(/^\||\|$/g,'').split('|').map(function(c){return c.trim();}));i++;}
       var tb=el('table');rows.forEach(function(r,ri){var tr=el('tr');r.forEach(function(c){tr.appendChild(el(ri===0?'th':'td',{text:c}));});tb.appendChild(tr);});
       box.appendChild(tb);continue;
@@ -299,7 +352,6 @@ function renderNotes(txt){
 }
 function cat(id){return S.cats.filter(function(c){return c.id===id;})[0];}
 
-/* ============ modal ============ */
 function modal(title,bodyNodes,wide){
   var back=div('mback');
   var m=div('modal'+(wide?' wide':''),[el('h3',{text:title})]);
@@ -310,7 +362,6 @@ function modal(title,bodyNodes,wide){
   return back;
 }
 
-/* ============ dashboard ============ */
 function vDash(){
   var w=div('',[
     el('div',{cls:'eyebrow',text:'Dashboard'}),
@@ -330,8 +381,9 @@ function vDash(){
     g.appendChild(card);
   });
   if(S.adminOn){
-    g.appendChild(div('catcard card addnew',['＋  Add New Category']));
-    g.lastChild.addEventListener('click',admAddCat);
+    var an=div('catcard card addnew',['＋  Add New Category']);
+    an.addEventListener('click',admAddCat);
+    g.appendChild(an);
   }
   w.appendChild(g);
   if(S.results.length){
@@ -340,7 +392,7 @@ function vDash(){
     S.results.slice(-6).reverse().forEach(function(r){
       list.appendChild(div('docrow card',[
         el('div',{cls:'dico',style:'background:'+(r.pass?'var(--green-soft)':'var(--red-soft)')+';color:'+(r.pass?'var(--green-dk)':'var(--red)'),text:r.pct+'%'}),
-        el('div',{},[el('div',{cls:'dnm',text:r.name+' — '+r.exam}),el('div',{cls:'dsz',text:r.date+' · '+(r.pass?'PASSED':'FAILED')+' · ID '+r.vid})]),
+        el('div',{},[el('div',{cls:'dnm',text:(r.name||'Candidate')+' — '+r.exam}),el('div',{cls:'dsz',text:r.date+' · '+(r.pass?'PASSED':'FAILED')+' · ID '+r.vid})]),
         div('dsp'),
         r.pass?btn('Certificate','sm',function(){openCert(r);}):null
       ]));
@@ -350,7 +402,6 @@ function vDash(){
   mount(w);
 }
 
-/* ============ category view ============ */
 function vCat(cid,tab){
   var c=cat(cid);
   var w=div('',[
@@ -372,11 +423,34 @@ function vCat(cid,tab){
   mount(w);
 }
 
-/* ---- documents ---- */
 function tabDocs(c,body){
   if(S.adminOn){
-    var up=div('admbox card',[el('h3',{text:'📤 Upload reference PDF'}),
-      el('p',{cls:'sub',style:'margin-bottom:10px',text:'PDFs are stored locally in this browser (IndexedDB). If the file picker does not open, use Chrome directly rather than an in-app viewer.'}),
+    var urlI=el('input',{placeholder:'https://sdmbrk.github.io/docs/DBC-A.pdf',type:'url'});
+    var ub=div('admbox card',[el('h3',{text:'🔗 Add PDF from URL (works on mobile)'}),
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'Host your PDFs on GitHub Pages (sdmbrk.github.io) or any CORS-enabled server, paste the direct link, and the app downloads and stores it permanently in this browser.'}),
+      div('field',[urlI]),
+      btn('⬇ Fetch & save PDF','pri',function(){
+        var u=urlI.value.trim();
+        if(!u){toast('Paste a PDF URL first');return;}
+        toast('Downloading…');
+        fetch(u).then(function(r){
+          if(!r.ok)throw new Error('http');
+          return r.arrayBuffer();
+        }).then(function(buf){
+          if(buf.byteLength<100)throw new Error('empty');
+          var id=uid();
+          var name=decodeURIComponent(u.split('/').pop().split('?')[0])||'document.pdf';
+          pdfPut({id:id,name:name,data:buf},function(){
+            c.docs.push({id:id,name:name,size:buf.byteLength});save();toast('PDF saved — '+fmtBytes(buf.byteLength));vCat(c.id,'docs');
+          });
+        }).catch(function(){
+          toast('Download failed — check the URL. GitHub Pages links work; some servers block cross-origin requests.');
+        });
+      })
+    ]);
+    body.appendChild(ub);
+    var up=div('admbox card',[el('h3',{text:'📤 Upload reference PDF from device'}),
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'Use this when the app is opened directly in a browser (like Chrome) rather than an embedded viewer.'}),
       el('input',{type:'file',accept:'application/pdf',id:'pdfup'})]);
     up.querySelector('#pdfup').addEventListener('change',function(e){
       var f=e.target.files[0];if(!f)return;
@@ -391,13 +465,13 @@ function tabDocs(c,body){
     });
     body.appendChild(up);
   }
-  if(!c.docs.length){body.appendChild(div('emptybox',['No reference documents yet.'+(S.adminOn?'':' Ask an admin to upload the code PDFs.')]));return;}
+  if(!c.docs.length){body.appendChild(div('emptybox',['No reference documents yet.'+(S.adminOn?'':' Ask an admin to add the code PDFs.')]));return;}
   var list=div('doclist');
   c.docs.forEach(function(d){
     var row=div('docrow card',[div('dico',['PDF']),
       el('div',{},[el('div',{cls:'dnm',text:d.name}),el('div',{cls:'dsz',text:fmtBytes(d.size)})]),
       div('dsp'),
-      btn('Open','sm pri',function(){openPdf(c,d,body);})]);
+      btn('Open','sm pri',function(){openPdf(c,d);})]);
     if(S.adminOn){row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){
       pdfDel(d.id,function(){c.docs=c.docs.filter(function(x){return x.id!==d.id;});save();toast('Deleted');vCat(c.id,'docs');});
     },'Delete'));}
@@ -406,7 +480,7 @@ function tabDocs(c,body){
   body.appendChild(list);
   var vb=div('viewerbox');vb.id='pdfviewer';body.appendChild(vb);
 }
-function openPdf(c,d,body){
+function openPdf(c,d){
   pdfGet(d.id,function(rec){
     if(!rec){toast('File not found in local storage');return;}
     var blob=new Blob([rec.data],{type:'application/pdf'});
@@ -421,18 +495,41 @@ function openPdf(c,d,body){
   });
 }
 
-/* ---- study ---- */
+var openSecs={};
 function tabStudy(c,body){
   if(!c.sections.length){body.appendChild(div('emptybox',['No study sections yet.']));return;}
   c.sections.forEach(function(s,i){
-    var sec=div('studysec card',[el('h3',{},[div('snum',[String(i+1)]),el('span',{text:s.title})])]);
-    if(s.img)sec.appendChild(el('img',{src:s.img,alt:s.title,style:'max-width:100%;border-radius:9px;border:1px solid var(--line);margin-top:10px'}));
-    sec.appendChild(renderNotes(s.notes));
+    var imgs=secImgs(s);
+    var sec=div('studysec card');
+    var chev=el('span',{cls:'chev',text:'▾'});
+    var head=el('h3',{},[div('snum',[String(i+1)]),el('span',{cls:'stitle',text:s.title}),chev]);
+    sec.appendChild(head);
+    if(imgs[0])sec.appendChild(el('img',{cls:'coverimg',src:imgs[0],alt:s.title}));
+    var tog=el('button',{cls:'togbar'},['▾ Show details']);
+    var bodyBox=div('secbody');
+    var hasInline=/\[img:\d+\]/.test(s.notes||'');
+    if(!hasInline&&imgs.length>1){
+      var gal=div('');
+      imgs.slice(1).forEach(function(im){gal.appendChild(el('img',{src:im,style:'max-width:100%;border-radius:9px;border:1px solid var(--line);margin:8px 0;display:block'}));});
+      bodyBox.appendChild(gal);
+    }
+    bodyBox.appendChild(renderNotes(s.notes,imgs));
+    var open=!!openSecs[s.id];
+    function apply(){
+      bodyBox.style.display=open?'':'none';
+      tog.textContent=open?'▴ Hide details':'▾ Show details';
+      chev.textContent=open?'▴':'▾';
+    }
+    function toggle(){open=!open;openSecs[s.id]=open;apply();}
+    head.addEventListener('click',toggle);
+    tog.addEventListener('click',toggle);
+    apply();
+    sec.appendChild(tog);
+    sec.appendChild(bodyBox);
     body.appendChild(sec);
   });
 }
 
-/* ---- exam ---- */
 function tabExam(c,body){
   if(!c.questions.length){body.appendChild(div('emptybox',['No questions in the bank yet.']));return;}
   var n=Math.min(c.quizCount||20,c.questions.length);
@@ -476,8 +573,7 @@ function vQuiz(){
   if(i<n-1)nav.appendChild(btn('Next ›','pri',function(){QZ.cur++;vQuiz();}));
   else{
     var unans=QZ.ans.filter(function(a){return a<0;}).length;
-    var sb=btn(unans?('Submit ('+unans+' unanswered)'):'Submit Exam','grn',function(){finishQuiz();});
-    nav.appendChild(sb);
+    nav.appendChild(btn(unans?('Submit ('+unans+' unanswered)'):'Submit Exam','grn',function(){finishQuiz();}));
   }
   qc.appendChild(nav);
   w.appendChild(qc);
@@ -493,10 +589,9 @@ function finishQuiz(){
   vResult(rec);
 }
 function vResult(r){
-  var c=cat(r.cat);
   var circ=2*Math.PI*64;
   var ring=div('scorering',[]);
-  ring.innerHTML='<svg width="150" height="150"><circle cx="75" cy="75" r="64" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="75" cy="75" r="64" fill="none" stroke="'+(r.pass?'var(--green)':'var(--red)')+'" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+(circ*(1-r.pct/100))+'"/></svg>';
+  ring.innerHTML='<svg width="150" height="150"><circle cx="75" cy="75" r="64" fill="none" stroke="#DDE4E1" stroke-width="11"/><circle cx="75" cy="75" r="64" fill="none" stroke="'+(r.pass?'#16A34A':'#C0392B')+'" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+(circ*(1-r.pct/100))+'"/></svg>';
   ring.appendChild(div('pct',[el('span',{text:r.pct+'%'}),el('small',{text:r.score+' / '+r.total})]));
   var w=div('',[div('result card',[
     el('div',{cls:'eyebrow',text:r.exam}),
@@ -525,7 +620,6 @@ function vResult(r){
   mount(w);
 }
 
-/* ---- results tab ---- */
 function tabResults(c,body){
   var rs=S.results.filter(function(r){return r.cat===c.id;});
   if(!rs.length){body.appendChild(div('emptybox',['No attempts yet — sit the exam to see results here.']));return;}
@@ -541,9 +635,7 @@ function tabResults(c,body){
   });
   body.appendChild(list);
 }
-</script>
-<script>
-/* ============ admin ============ */
+
 function admToggle(){
   if(S.adminOn){S.adminOn=false;save();refreshAdm();vDash();toast('Admin mode off');return;}
   var inp=el('input',{type:'password',placeholder:'Passcode'});
@@ -573,15 +665,17 @@ function admAddCat(){
     div('field',[el('label',{text:'Exam name'}),ex]),
     btn('Create category','pri',function(){
       if(!nm.value.trim()){toast('Name required');return;}
-      S.cats.push({id:nm.value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-'),name:nm.value.trim(),icon:ic.value||'📘',active:true,desc:ds.value,docs:[],sections:[],questions:[],examName:ex.value||nm.value+' Certification',quizCount:20});
+      S.cats.push({id:nm.value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+uid().toLowerCase(),name:nm.value.trim(),icon:ic.value||'📘',active:true,desc:ds.value,docs:[],sections:[],questions:[],examName:ex.value||nm.value+' Certification',quizCount:20});
       save();m.remove();vDash();toast('Category created');
     })
   ]);
 }
 function tabManage(c,body){
-  /* settings */
-  var nmI=el('input',{value:c.name}),exI=el('input',{value:c.examName}),qcI=el('input',{type:'number',min:'1',value:c.quizCount||20});
-  var actI=el('select');['Active','Placeholder (Coming soon)'].forEach(function(o,i){actI.appendChild(el('option',{value:i?'0':'1',text:o}));});
+  var nmI=el('input',{}),exI=el('input',{}),qcI=el('input',{type:'number',min:'1'});
+  nmI.value=c.name;exI.value=c.examName;qcI.value=c.quizCount||20;
+  var actI=el('select');
+  actI.appendChild(el('option',{value:'1',text:'Active'}));
+  actI.appendChild(el('option',{value:'0',text:'Placeholder (Coming soon)'}));
   actI.value=c.active?'1':'0';
   body.appendChild(div('admbox card',[el('h3',{text:'⚙ Category settings'}),
     div('field',[el('label',{text:'Name'}),nmI]),
@@ -590,17 +684,35 @@ function tabManage(c,body){
     div('field',[el('label',{text:'Status'}),actI]),
     btn('Save settings','pri',function(){c.name=nmI.value;c.examName=exI.value;c.quizCount=Math.max(1,parseInt(qcI.value)||20);c.active=actI.value==='1';save();toast('Saved');vCat(c.id,'manage');})
   ]));
-  /* sections */
+  var bulkT=el('textarea',{placeholder:'Paste one question per line…',style:'min-height:150px'});
+  body.appendChild(div('admbox card',[el('h3',{text:'📥 Bulk import questions'}),
+    div('hint',['Format (one per line, pipe-separated):',el('br'),'Question | Option A | Option B | Option C | Option D | B | Explanation | Section',el('br'),'Correct answer = letter A–D (or number 1–4). Explanation and Section are optional.']),
+    div('field',[bulkT]),
+    btn('Import questions','pri',function(){
+      var lines=bulkT.value.split('\n'),added=0,skipped=0;
+      lines.forEach(function(line){
+        line=line.trim();if(!line)return;
+        var p=line.split('|').map(function(s){return s.trim();});
+        if(p.length<6){skipped++;return;}
+        var letter=p[5].toUpperCase(),ci='ABCD'.indexOf(letter);
+        if(ci<0){var num=parseInt(p[5]);if(num>=1&&num<=4)ci=num-1;}
+        if(ci<0||!p[0]||!p[1]||!p[2]||!p[3]||!p[4]){skipped++;return;}
+        c.questions.push({id:uid(),sec:p[7]||'General',q:p[0],opts:[p[1],p[2],p[3],p[4]],c:ci,ex:p[6]||''});
+        added++;
+      });
+      if(added){save();toast(added+' questions imported'+(skipped?', '+skipped+' skipped':''));vCat(c.id,'manage');}
+      else toast(skipped?'No valid lines — check the format':'Nothing to import');
+    })
+  ]));
   var sbox=div('admbox card',[el('h3',{text:'📖 Study sections ('+c.sections.length+')'})]);
   c.sections.forEach(function(s,i){
-    var row=div('qbrow',[el('div',{cls:'qbq'},[el('div',{text:(i+1)+'. '+s.title}),el('div',{cls:'qbmeta',text:(s.notes||'').slice(0,90)+'…'})]),
+    var row=div('qbrow',[el('div',{cls:'qbq'},[el('div',{text:(i+1)+'. '+s.title}),el('div',{cls:'qbmeta',text:secImgs(s).length+' image(s) · '+(s.notes||'').slice(0,70)+'…'})]),
       btn('Edit','sm',function(){admEditSection(c,s);})]);
     row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){c.sections=c.sections.filter(function(x){return x.id!==s.id;});save();vCat(c.id,'manage');},'Delete'));
     sbox.appendChild(row);
   });
   sbox.appendChild(btn('＋ Add section','',function(){admEditSection(c,null);}));
   body.appendChild(sbox);
-  /* questions */
   var qbox=div('admbox card',[el('h3',{text:'❓ Question bank ('+c.questions.length+')'})]);
   c.questions.forEach(function(q,i){
     var row=div('qbrow',[el('div',{cls:'qbq'},[el('div',{text:(i+1)+'. '+q.q}),el('div',{cls:'qbmeta',text:q.sec+' · Correct: '+String.fromCharCode(65+q.c)})]),
@@ -610,28 +722,113 @@ function tabManage(c,body){
   });
   qbox.appendChild(btn('＋ Add question','',function(){admEditQ(c,null);}));
   body.appendChild(qbox);
-  /* passcode */
+  var restT=el('textarea',{placeholder:'Paste exported backup JSON here…',style:'min-height:90px'});
+  var rbtn=armBtn(btn('Restore from pasted JSON','dngr',null),function(){
+    try{
+      var data=JSON.parse(restT.value);
+      if(!data.cats||!data.adminPass)throw new Error('bad');
+      S=data;S.adminOn=true;
+      S.cats.forEach(function(cc){(cc.sections||[]).forEach(function(s){if(!s.imgs)s.imgs=s.img?[s.img]:[];});});
+      if(!S.ver||S.ver<3)S.ver=3;
+      save();toast('Backup restored');vDash();
+    }catch(e){toast('Invalid backup JSON');}
+  },'Restore from pasted JSON');
+  body.appendChild(div('admbox card',[el('h3',{text:'💾 Backup & restore (all categories)'}),
+    el('p',{cls:'sub',style:'margin-bottom:10px',text:'Copy the backup text to move questions, notes, images and results to another device or a hosted copy of this app (PDFs are not included). Restore replaces everything — two taps to confirm.'}),
+    el('div',{style:'display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px'},[
+      btn('📋 Copy backup to clipboard','pri',function(){
+        var txt=JSON.stringify(S);
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('Backup copied — paste it anywhere safe');},function(){showBackupText(txt);});}
+        else showBackupText(txt);
+      }),
+      btn('⬇ Download backup file','',function(){
+        var a=el('a',{href:'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S)),download:'rlcp-backup-'+new Date().toISOString().slice(0,10)+'.json'});
+        document.body.appendChild(a);a.click();a.remove();
+      })
+    ]),
+    div('field',[el('label',{text:'Restore'}),restT]),
+    rbtn
+  ]));
   var pcI=el('input',{type:'password',placeholder:'New passcode'});
   body.appendChild(div('admbox card',[el('h3',{text:'🔐 Admin passcode'}),
     div('field',[pcI]),
     btn('Change passcode','',function(){if(pcI.value.length<4){toast('Min 4 characters');return;}S.adminPass=pcI.value;save();toast('Passcode changed');})
   ]));
 }
+function showBackupText(txt){
+  var ta=el('textarea',{style:'min-height:200px;width:100%'});ta.value=txt;
+  modal('Backup JSON — select all and copy',[div('field',[ta])],true);
+  ta.focus();ta.select();
+}
+function shrinkImage(dataUrl,cb){
+  var img=new Image();
+  img.onload=function(){
+    var maxW=1400;
+    if(img.width<=maxW){cb(dataUrl);return;}
+    var scale=maxW/img.width;
+    var cv=document.createElement('canvas');
+    cv.width=maxW;cv.height=Math.round(img.height*scale);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    cb(cv.toDataURL('image/jpeg',0.82));
+  };
+  img.onerror=function(){cb(dataUrl);};
+  img.src=dataUrl;
+}
 function admEditSection(c,s){
-  var isNew=!s;if(isNew)s={id:uid(),title:'',notes:'',img:null};
-  var tI=el('input',{value:s.title,placeholder:'Section title'});
-  var nI=el('textarea',{placeholder:'Notes. Formatting: "## " heading · "- " bullet · "| a | b |" table row · "!! " warning box'});
+  var isNew=!s;if(isNew)s={id:uid(),title:'',notes:'',imgs:[]};
+  var imgs=secImgs(s).slice();
+  var tI=el('input',{placeholder:'Section title'});tI.value=s.title;
+  var nI=el('textarea',{placeholder:'Notes. Formatting: "## " heading, "- " bullet, "| a | b |" table row, "!! " warning box, "[img:2]" places image #2 inline'});
   nI.value=s.notes||'';
-  var imgI=el('input',{type:'file',accept:'image/*'});
-  var imgData=s.img;
-  imgI.addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){imgData=fr.result;toast('Image attached');};fr.readAsDataURL(f);});
+  var gal=div('imggal');
+  function renderGal(){
+    gal.innerHTML='';
+    if(!imgs.length){gal.appendChild(el('span',{cls:'sub',text:'No images yet. Image #1 is the cover (always visible); others show inside the collapsible details.'}));return;}
+    imgs.forEach(function(im,idx){
+      var th=div('thumb',[
+        el('img',{src:im}),
+        el('span',{cls:'tag',text:idx===0?'#1 COVER':'#'+(idx+1)}),
+        el('button',{cls:'rm',text:'✕',onclick:function(){imgs.splice(idx,1);renderGal();}})
+      ]);
+      gal.appendChild(th);
+    });
+  }
+  renderGal();
+  var imgI=el('input',{type:'file',accept:'image/*',multiple:''});
+  imgI.addEventListener('change',function(e){
+    var files=Array.prototype.slice.call(e.target.files||[]);
+    if(!files.length)return;
+    var pending=files.length;
+    files.forEach(function(f){
+      var fr=new FileReader();
+      fr.onload=function(){
+        shrinkImage(fr.result,function(small){
+          imgs.push(small);
+          pending--;if(pending===0){renderGal();toast(files.length+' image(s) attached');}
+        });
+      };
+      fr.readAsDataURL(f);
+    });
+  });
+  var urlI=el('input',{placeholder:'https://sdmbrk.github.io/imgs/figure1.png',type:'url'});
+  var urlBtn=btn('⬇ Fetch image from URL','sm',function(){
+    var u=urlI.value.trim();if(!u){toast('Paste an image URL');return;}
+    toast('Downloading image…');
+    fetch(u).then(function(r){if(!r.ok)throw 0;return r.blob();}).then(function(bl){
+      var fr=new FileReader();
+      fr.onload=function(){shrinkImage(fr.result,function(small){imgs.push(small);renderGal();urlI.value='';toast('Image added');});};
+      fr.readAsDataURL(bl);
+    }).catch(function(){toast('Image download failed — check URL/CORS (GitHub Pages works)');});
+  });
   var m=modal((isNew?'Add':'Edit')+' study section',[
     div('field',[el('label',{text:'Title'}),tI]),
+    div('field',[el('label',{text:'Images ('+'#1 = cover, rest in details; use [img:N] in notes for inline placement)'}),gal]),
+    div('field',[el('label',{text:'Add images from device'}),imgI]),
+    div('field',[el('label',{text:'Add image from URL (works on mobile)'}),urlI,urlBtn]),
     div('field',[el('label',{text:'Notes'}),nI]),
-    div('field',[el('label',{text:'Diagram / image (optional)'}),imgI]),
     btn('Save section','pri',function(){
       if(!tI.value.trim()){toast('Title required');return;}
-      s.title=tI.value.trim();s.notes=nI.value;s.img=imgData;
+      s.title=tI.value.trim();s.notes=nI.value;s.imgs=imgs;s.img=imgs[0]||null;
       if(isNew)c.sections.push(s);
       save();m.remove();vCat(c.id,'manage');toast('Section saved');
     })
@@ -644,17 +841,18 @@ function admEditQ(c,q){
   secI.appendChild(el('option',{value:'General',text:'General'}));
   secI.value=q.sec||'General';
   var qI=el('textarea',{style:'min-height:60px'});qI.value=q.q;
-  var oIs=q.opts.map(function(o,i){return el('input',{value:o,placeholder:'Option '+String.fromCharCode(65+i)});});
+  var oIs=q.opts.map(function(o,i){var inp=el('input',{placeholder:'Option '+String.fromCharCode(65+i)});inp.value=o;return inp;});
   var cI=el('select');['A','B','C','D'].forEach(function(L,i){cI.appendChild(el('option',{value:String(i),text:L}));});
   cI.value=String(q.c);
-  var exI=el('input',{value:q.ex||'',placeholder:'Shown in answer review'});
+  var exI=el('input',{placeholder:'Shown in answer review'});exI.value=q.ex||'';
   var kids=[div('field',[el('label',{text:'Section'}),secI]),div('field',[el('label',{text:'Question'}),qI])];
   oIs.forEach(function(o,i){kids.push(div('field',[el('label',{text:'Option '+String.fromCharCode(65+i)}),o]));});
   kids.push(div('field',[el('label',{text:'Correct answer'}),cI]));
   kids.push(div('field',[el('label',{text:'Explanation (optional)'}),exI]));
   kids.push(btn('Save question','pri',function(){
     if(!qI.value.trim()){toast('Question text required');return;}
-    if(oIs.some(function(o){return !o.value.trim();})){toast('All 4 options required');return;}
+    var missing=false;oIs.forEach(function(o){if(!o.value.trim())missing=true;});
+    if(missing){toast('All 4 options required');return;}
     q.sec=secI.value;q.q=qI.value.trim();q.opts=oIs.map(function(o){return o.value.trim();});q.c=parseInt(cI.value);q.ex=exI.value;
     if(isNew)c.questions.push(q);
     save();m.remove();vCat(c.id,'manage');toast('Question saved');
@@ -662,55 +860,49 @@ function admEditQ(c,q){
   var m=modal((isNew?'Add':'Edit')+' question',kids,true);
 }
 
-/* ============ certificate ============ */
 function openCert(r){
-  var nmI=el('input',{value:r.name||'',placeholder:'Full name as it should appear'});
+  var nmI=el('input',{placeholder:'Full name as it should appear'});nmI.value=r.name||'';
   var cv=el('canvas',{cls:'certprev'});
   function redraw(){r.name=nmI.value;drawCert(cv,r);}
   nmI.addEventListener('input',redraw);
-  var m=modal('Certificate — '+r.exam,[
+  nmI.addEventListener('change',save);
+  var btnrow=el('div',{style:'display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'});
+  btnrow.appendChild(btn('⬇ Download PDF','grn',function(){certPdf(cv,r);}));
+  btnrow.appendChild(btn('⬇ Download PNG','',function(){
+    var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});
+    document.body.appendChild(a);a.click();a.remove();
+  }));
+  modal('Certificate — '+r.exam,[
     div('field',[el('label',{text:'Candidate name'}),nmI]),
     cv,
-    el('div',{style:'display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'}),
+    btnrow
   ],true);
-  var btns=m.querySelector('.modal').lastChild;
-  btns.appendChild(btn('⬇ Download PDF','grn',function(){certPdf(cv,r);}));
-  btns.appendChild(btn('⬇ Download PNG','',function(){
-    var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});a.click();
-  }));
   redraw();
   save();
-  nmI.addEventListener('change',save);
 }
 function drawCert(cv,r){
   var W=2000,H=1414;cv.width=W;cv.height=H;
   var x=cv.getContext('2d');
-  /* background */
   x.fillStyle='#FDFDFB';x.fillRect(0,0,W,H);
-  /* subtle blueprint grid */
   x.strokeStyle='rgba(14,124,123,0.05)';x.lineWidth=1;
-  for(var g=0;g<W;g+=50){x.beginPath();x.moveTo(g,0);x.lineTo(g,H);x.stroke();}
+  var g;
+  for(g=0;g<W;g+=50){x.beginPath();x.moveTo(g,0);x.lineTo(g,H);x.stroke();}
   for(g=0;g<H;g+=50){x.beginPath();x.moveTo(0,g);x.lineTo(W,g);x.stroke();}
-  /* borders */
   x.strokeStyle='#0E7C7B';x.lineWidth=14;x.strokeRect(40,40,W-80,H-80);
   x.strokeStyle='#C9A227';x.lineWidth=3;x.strokeRect(68,68,W-136,H-136);
-  /* corner ticks */
   x.strokeStyle='#C9A227';x.lineWidth=5;
-  [[90,90,1,1],[W-90,90,-1,1],[90,H-90,1,-1],[W-90,H-90,-1,-1]].forEach(function(k){
+  [[90,90,1,1],[1910,90,-1,1],[90,1324,1,-1],[1910,1324,-1,-1]].forEach(function(k){
     x.beginPath();x.moveTo(k[0],k[1]+40*k[3]);x.lineTo(k[0],k[1]);x.lineTo(k[0]+40*k[2],k[1]);x.stroke();
   });
   x.textAlign='center';
-  /* brand */
   x.fillStyle='#0E7C7B';x.font='700 26px "Segoe UI",Arial';
   x.fillText('S D M B R K   C O L L E C T I O N S',W/2,150);
   x.fillStyle='#8A948F';x.font='400 22px "Segoe UI",Arial';
   x.fillText('Regulatory Learning & Certification Portal',W/2,186);
-  /* title */
   x.fillStyle='#1C2422';x.font='400 88px Georgia,serif';
   x.fillText('Certificate of Achievement',W/2,300);
   x.strokeStyle='#C9A227';x.lineWidth=3;
   x.beginPath();x.moveTo(W/2-260,330);x.lineTo(W/2+260,330);x.stroke();
-  /* body */
   x.fillStyle='#5F6B67';x.font='400 30px "Segoe UI",Arial';
   x.fillText('This is to certify that',W/2,410);
   x.fillStyle='#0A5B5A';x.font='italic 700 80px Georgia,serif';
@@ -723,24 +915,20 @@ function drawCert(cv,r){
   x.fillText(r.exam,W/2,670);
   x.fillStyle='#5F6B67';x.font='400 30px "Segoe UI",Arial';
   x.fillText('with a score of',W/2,740);
-  /* score + badge */
   x.fillStyle='#16A34A';x.font='800 76px "Segoe UI",Arial';
   x.fillText(r.pct+'%',W/2,825);
-  /* PASSED badge */
   x.fillStyle='#E7F6EC';roundRect(x,W/2-140,860,280,64,32);x.fill();
   x.strokeStyle='#16A34A';x.lineWidth=3;roundRect(x,W/2-140,860,280,64,32);x.stroke();
   x.fillStyle='#116B33';x.font='800 34px "Segoe UI",Arial';
   x.fillText('P A S S E D',W/2,904);
-  /* gold seal */
   drawSeal(x,W-330,H-330,120);
-  /* footer info */
   x.textAlign='left';x.fillStyle='#5F6B67';x.font='400 26px "Segoe UI",Arial';
   x.fillText('Date of issue',180,H-240);
   x.fillStyle='#1C2422';x.font='700 32px "Segoe UI",Arial';
   x.fillText(r.date,180,H-198);
   x.fillStyle='#5F6B67';x.font='400 26px "Segoe UI",Arial';
   x.fillText('Verification ID',180,H-140);
-  x.fillStyle='#1C2422';x.font='700 32px ui-monospace,Consolas,monospace';
+  x.fillStyle='#1C2422';x.font='700 32px Consolas,monospace';
   x.fillText(r.vid,180,H-98);
   x.textAlign='center';
   x.fillStyle='#8A948F';x.font='400 22px "Segoe UI",Arial';
@@ -748,7 +936,6 @@ function drawCert(cv,r){
 }
 function roundRect(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
 function drawSeal(x,cx,cy,R){
-  /* scalloped gold seal */
   x.save();
   var n=28;x.beginPath();
   for(var i=0;i<=n*2;i++){var ang=i*Math.PI/n;var rr=(i%2===0)?R:R*0.9;x.lineTo(cx+rr*Math.cos(ang),cy+rr*Math.sin(ang));}
@@ -760,7 +947,6 @@ function drawSeal(x,cx,cy,R){
   x.fillStyle='#5C4A0D';x.textAlign='center';
   x.font='800 30px "Segoe UI",Arial';x.fillText('CERTIFIED',cx,cy-6);
   x.font='700 20px "Segoe UI",Arial';x.fillText('70% PASS MARK',cx,cy+26);
-  /* ribbons */
   x.fillStyle='#9E7E17';
   x.beginPath();x.moveTo(cx-46,cy+R*0.8);x.lineTo(cx-26,cy+R+74);x.lineTo(cx-6,cy+R+50);x.lineTo(cx-6,cy+R*0.8);x.closePath();x.fill();
   x.beginPath();x.moveTo(cx+46,cy+R*0.8);x.lineTo(cx+26,cy+R+74);x.lineTo(cx+6,cy+R+50);x.lineTo(cx+6,cy+R*0.8);x.closePath();x.fill();
@@ -775,11 +961,10 @@ function certPdf(cv,r){
   if(window.jspdf){make();return;}
   var s=el('script',{src:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'});
   s.onload=make;
-  s.onerror=function(){toast('Offline — downloading PNG instead');var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});a.click();};
+  s.onerror=function(){toast('Offline — downloading PNG instead');var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});document.body.appendChild(a);a.click();a.remove();};
   document.head.appendChild(s);
 }
 
-/* ============ boot ============ */
 load();
 document.getElementById('admbtn').addEventListener('click',admToggle);
 document.getElementById('brandhome').addEventListener('click',vDash);
