@@ -1,3 +1,7 @@
+
+
+
+Regulatory portal · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -164,7 +168,7 @@ footer.app{max-width:1100px;margin:0 auto;padding:26px 16px;color:var(--muted);f
   <button class="adm-pill" id="admbtn">Admin: OFF</button>
 </div></header>
 <div class="wrap" id="app"></div>
-<footer class="app">Regulatory Learning &amp; Certification Portal · Pass mark 70% · Built for site &amp; office use · <b>Sdmbrk Collections</b></footer>
+<footer class="app">Regulatory Learning &amp; Certification Portal · Built for site &amp; office use · <b>Sdmbrk Collections</b></footer>
 <div class="toast" id="toast"></div>
 <script>
 function el(tag,attrs,kids){var n=document.createElement(tag);attrs=attrs||{};
@@ -185,13 +189,13 @@ function uid(){return Math.random().toString(36).slice(2,8).toUpperCase();}
 function fmtBytes(b){return b>1048576?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';}
 function todayStr(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});}
 function secImgs(s){return s.imgs||(s.img?[s.img]:[]);}
-
+ 
 var LS='rlcp_v1';
 var S=null;
 function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){toast('Save failed — storage may be full (large images). Remove some images.');}}
 function load(){
   try{S=JSON.parse(localStorage.getItem(LS));}catch(e){S=null;}
-  if(!S){S=seedState();S.ver=3;save();return;}
+  if(!S){S=seedState();S.ver=4;save();return;}
   if(!S.ver||S.ver<2){
     var dc=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc=c;});
     if(dc){
@@ -204,6 +208,10 @@ function load(){
   if(S.ver<3){
     S.cats.forEach(function(c){(c.sections||[]).forEach(function(s){if(!s.imgs)s.imgs=s.img?[s.img]:[];});});
     S.ver=3;
+  }
+  if(S.ver<4){
+    S.cats.forEach(function(c){if(!c.passMark)c.passMark=70;});
+    S.ver=4;
   }
   save();
 }
@@ -218,7 +226,7 @@ function idbOpen(cb){
 function pdfPut(rec,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').put(rec);tx.oncomplete=cb;tx.onerror=function(){toast('PDF save failed (file too large?)');};});}
 function pdfGet(id,cb){idbOpen(function(db){var rq=db.transaction('pdfs').objectStore('pdfs').get(id);rq.onsuccess=function(){cb(rq.result);};});}
 function pdfDel(id,cb){idbOpen(function(db){var tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').delete(id);tx.oncomplete=cb;});}
-
+ 
 function seedState(){
   return {
     adminPass:'sdmbrk', adminOn:false,
@@ -227,13 +235,13 @@ function seedState(){
       { id:'dubai-codes', name:'Dubai Codes', icon:'🏗️', active:true,
         desc:'Dubai Building Code (DBC 2021) — study notes, reference documents and certification exam.',
         docs:[], sections: seedPartA().concat(seedSections()), questions: seedQuestions(),
-        examName:'Dubai Building Code Certification', quizCount:20 },
+        examName:'Dubai Building Code Certification', quizCount:20, passMark:70 },
       { id:'dewa', name:'DEWA Regulations', icon:'⚡', active:false,
         desc:'DEWA Regulations for Electrical Installations — coming soon.',
-        docs:[],sections:[],questions:[],examName:'DEWA Regulations Certification',quizCount:20},
+        docs:[],sections:[],questions:[],examName:'DEWA Regulations Certification',quizCount:20,passMark:70},
       { id:'dcd', name:'Dubai Civil Defense', icon:'🧯', active:false,
         desc:'UAE Fire & Life Safety Code of Practice — coming soon.',
-        docs:[],sections:[],questions:[],examName:'DCD Fire & Life Safety Certification',quizCount:20}
+        docs:[],sections:[],questions:[],examName:'DCD Fire & Life Safety Certification',quizCount:20,passMark:70}
     ]
   };
 }
@@ -325,7 +333,7 @@ function seedQuestions(){
  q(F,'Changes to fire alarm or firefighting systems require approval from:',['Dubai Municipality only','The main contractor','Dubai Civil Defense','DEWA'],2,'Fire system deviations need DCD approval — DM approval does not cover fire.'),
  ];
 }
-
+ 
 function renderNotes(txt,imgs){
   imgs=imgs||[];
   var box=div('notes'),lines=String(txt||'').split('\n'),i=0;
@@ -351,7 +359,7 @@ function renderNotes(txt,imgs){
   return box;
 }
 function cat(id){return S.cats.filter(function(c){return c.id===id;})[0];}
-
+ 
 function modal(title,bodyNodes,wide){
   var back=div('mback');
   var m=div('modal'+(wide?' wide':''),[el('h3',{text:title})]);
@@ -361,12 +369,12 @@ function modal(title,bodyNodes,wide){
   document.body.appendChild(back);
   return back;
 }
-
+ 
 function vDash(){
   var w=div('',[
     el('div',{cls:'eyebrow',text:'Dashboard'}),
     el('h1',{cls:'page',text:'Regulation Categories'}),
-    el('p',{cls:'sub',text:'Study reference documents, revise section notes, then sit the certification exam. Pass mark is 70%.'})
+    el('p',{cls:'sub',text:'Study reference documents, revise section notes, then sit the certification exam.'})
   ]);
   var g=div('catgrid');
   S.cats.forEach(function(c){
@@ -401,7 +409,7 @@ function vDash(){
   }
   mount(w);
 }
-
+ 
 function vCat(cid,tab){
   var c=cat(cid);
   var w=div('',[
@@ -422,7 +430,7 @@ function vCat(cid,tab){
   if(tab==='manage')tabManage(c,body);
   mount(w);
 }
-
+ 
 function tabDocs(c,body){
   if(S.adminOn){
     var urlI=el('input',{placeholder:'https://sdmbrk.github.io/docs/DBC-A.pdf',type:'url'});
@@ -494,7 +502,7 @@ function openPdf(c,d){
     vb.scrollIntoView({behavior:'smooth'});
   });
 }
-
+ 
 var openSecs={};
 function tabStudy(c,body){
   if(!c.sections.length){body.appendChild(div('emptybox',['No study sections yet.']));return;}
@@ -529,14 +537,15 @@ function tabStudy(c,body){
     body.appendChild(sec);
   });
 }
-
+ 
 function tabExam(c,body){
   if(!c.questions.length){body.appendChild(div('emptybox',['No questions in the bank yet.']));return;}
   var n=Math.min(c.quizCount||20,c.questions.length);
+  var pm=c.passMark||70;
   var intro=div('result card',[
     el('div',{cls:'eyebrow',text:c.examName}),
     el('h2',{cls:'sec',style:'margin-top:4px',text:'Ready to start?'}),
-    el('p',{cls:'rline',text:n+' questions drawn from a bank of '+c.questions.length+' · Pass mark 70% · Instant scoring'}),
+    el('p',{cls:'rline',text:n+' questions drawn from a bank of '+c.questions.length+' · Pass mark '+pm+'% · Instant scoring'}),
     btn('Start Exam','pri',function(){startQuiz(c,n);})
   ]);
   body.appendChild(intro);
@@ -582,9 +591,10 @@ function vQuiz(){
 function finishQuiz(){
   var c=cat(QZ.cid),n=QZ.qs.length,score=0;
   QZ.qs.forEach(function(q,i){if(QZ.ans[i]===q.c)score++;});
-  var pct=Math.round(score/n*100),pass=pct>=70;
+  var pm=c.passMark||70;
+  var pct=Math.round(score/n*100),pass=pct>=pm;
   var vid='SDM-'+c.id.split('-').map(function(p){return p[0].toUpperCase();}).join('')+'-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+uid();
-  var rec={id:uid(),cat:c.id,exam:c.examName,name:'',score:score,total:n,pct:pct,pass:pass,date:todayStr(),vid:vid,qs:QZ.qs.map(function(q,i){return{q:q.q,opts:q.opts,c:q.c,a:QZ.ans[i],ex:q.ex};})};
+  var rec={id:uid(),cat:c.id,exam:c.examName,name:'',score:score,total:n,pct:pct,pass:pass,passMark:pm,date:todayStr(),vid:vid,qs:QZ.qs.map(function(q,i){return{q:q.q,opts:q.opts,c:q.c,a:QZ.ans[i],ex:q.ex};})};
   S.results.push(rec);save();
   vResult(rec);
 }
@@ -597,7 +607,7 @@ function vResult(r){
     el('div',{cls:'eyebrow',text:r.exam}),
     ring,
     el('div',{cls:'verdict '+(r.pass?'pass':'fail'),text:r.pass?'PASSED':'FAILED'}),
-    el('p',{cls:'rline',text:r.pass?'Congratulations — you met the 70% pass mark. Verification ID '+r.vid:'Pass mark is 70%. Review the sections below and try again.'}),
+    el('p',{cls:'rline',text:r.pass?'Congratulations — you met the '+(r.passMark||70)+'% pass mark. Verification ID '+r.vid:'Pass mark is '+(r.passMark||70)+'%. Review the sections below and try again.'}),
     el('div',{style:'display:flex;gap:10px;justify-content:center;flex-wrap:wrap'},[
       r.pass?btn('⬇ Download Certificate','grn',function(){openCert(r);}):btn('↻ Retake Exam','pri',function(){vCat(r.cat,'exam');}),
       btn('Study Center','',function(){vCat(r.cat,'study');}),
@@ -619,7 +629,7 @@ function vResult(r){
   }
   mount(w);
 }
-
+ 
 function tabResults(c,body){
   var rs=S.results.filter(function(r){return r.cat===c.id;});
   if(!rs.length){body.appendChild(div('emptybox',['No attempts yet — sit the exam to see results here.']));return;}
@@ -635,7 +645,7 @@ function tabResults(c,body){
   });
   body.appendChild(list);
 }
-
+ 
 function admToggle(){
   if(S.adminOn){S.adminOn=false;save();refreshAdm();vDash();toast('Admin mode off');return;}
   var inp=el('input',{type:'password',placeholder:'Passcode'});
@@ -671,8 +681,8 @@ function admAddCat(){
   ]);
 }
 function tabManage(c,body){
-  var nmI=el('input',{}),exI=el('input',{}),qcI=el('input',{type:'number',min:'1'});
-  nmI.value=c.name;exI.value=c.examName;qcI.value=c.quizCount||20;
+  var nmI=el('input',{}),exI=el('input',{}),qcI=el('input',{type:'number',min:'1'}),pmI=el('input',{type:'number',min:'1',max:'100'});
+  nmI.value=c.name;exI.value=c.examName;qcI.value=c.quizCount||20;pmI.value=c.passMark||70;
   var actI=el('select');
   actI.appendChild(el('option',{value:'1',text:'Active'}));
   actI.appendChild(el('option',{value:'0',text:'Placeholder (Coming soon)'}));
@@ -681,8 +691,13 @@ function tabManage(c,body){
     div('field',[el('label',{text:'Name'}),nmI]),
     div('field',[el('label',{text:'Exam name (appears on certificate)'}),exI]),
     div('field',[el('label',{text:'Questions per exam'}),qcI]),
+    div('field',[el('label',{text:'Pass mark %'}),pmI]),
     div('field',[el('label',{text:'Status'}),actI]),
-    btn('Save settings','pri',function(){c.name=nmI.value;c.examName=exI.value;c.quizCount=Math.max(1,parseInt(qcI.value)||20);c.active=actI.value==='1';save();toast('Saved');vCat(c.id,'manage');})
+    btn('Save settings','pri',function(){
+      var pm=parseInt(pmI.value);
+      if(!pm||pm<1||pm>100){toast('Pass mark must be between 1 and 100');return;}
+      c.name=nmI.value;c.examName=exI.value;c.quizCount=Math.max(1,parseInt(qcI.value)||20);c.passMark=pm;c.active=actI.value==='1';save();toast('Saved — new pass mark applies to future attempts');vCat(c.id,'manage');
+    })
   ]));
   var bulkT=el('textarea',{placeholder:'Paste one question per line…',style:'min-height:150px'});
   body.appendChild(div('admbox card',[el('h3',{text:'📥 Bulk import questions'}),
@@ -728,8 +743,8 @@ function tabManage(c,body){
       var data=JSON.parse(restT.value);
       if(!data.cats||!data.adminPass)throw new Error('bad');
       S=data;S.adminOn=true;
-      S.cats.forEach(function(cc){(cc.sections||[]).forEach(function(s){if(!s.imgs)s.imgs=s.img?[s.img]:[];});});
-      if(!S.ver||S.ver<3)S.ver=3;
+      S.cats.forEach(function(cc){(cc.sections||[]).forEach(function(s){if(!s.imgs)s.imgs=s.img?[s.img]:[];});if(!cc.passMark)cc.passMark=70;});
+      if(!S.ver||S.ver<4)S.ver=4;
       save();toast('Backup restored');vDash();
     }catch(e){toast('Invalid backup JSON');}
   },'Restore from pasted JSON');
@@ -859,7 +874,7 @@ function admEditQ(c,q){
   }));
   var m=modal((isNew?'Add':'Edit')+' question',kids,true);
 }
-
+ 
 function openCert(r){
   var nmI=el('input',{placeholder:'Full name as it should appear'});nmI.value=r.name||'';
   var cv=el('canvas',{cls:'certprev'});
@@ -932,7 +947,7 @@ function drawCert(cv,r){
   x.fillText(r.vid,180,H-98);
   x.textAlign='center';
   x.fillStyle='#8A948F';x.font='400 22px "Segoe UI",Arial';
-  x.fillText('Sdmbrk Collections · Pass mark 70% · Verify using the ID above within the portal',W/2,H-60);
+  x.fillText('Sdmbrk Collections · Pass mark '+(r.passMark||70)+'% · Verify using the ID above within the portal',W/2,H-60);
 }
 function roundRect(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
 function drawSeal(x,cx,cy,R){
@@ -946,7 +961,7 @@ function drawSeal(x,cx,cy,R){
   x.beginPath();x.arc(cx,cy,R*0.74,0,Math.PI*2);x.strokeStyle='rgba(255,255,255,0.65)';x.lineWidth=3;x.stroke();
   x.fillStyle='#5C4A0D';x.textAlign='center';
   x.font='800 30px "Segoe UI",Arial';x.fillText('CERTIFIED',cx,cy-6);
-  x.font='700 20px "Segoe UI",Arial';x.fillText('70% PASS MARK',cx,cy+26);
+  x.font='700 20px "Segoe UI",Arial';x.fillText('OFFICIAL PASS',cx,cy+26);
   x.fillStyle='#9E7E17';
   x.beginPath();x.moveTo(cx-46,cy+R*0.8);x.lineTo(cx-26,cy+R+74);x.lineTo(cx-6,cy+R+50);x.lineTo(cx-6,cy+R*0.8);x.closePath();x.fill();
   x.beginPath();x.moveTo(cx+46,cy+R*0.8);x.lineTo(cx+26,cy+R+74);x.lineTo(cx+6,cy+R+50);x.lineTo(cx+6,cy+R*0.8);x.closePath();x.fill();
@@ -964,7 +979,7 @@ function certPdf(cv,r){
   s.onerror=function(){toast('Offline — downloading PNG instead');var a=el('a',{href:cv.toDataURL('image/png'),download:'Certificate_'+r.vid+'.png'});document.body.appendChild(a);a.click();a.remove();};
   document.head.appendChild(s);
 }
-
+ 
 load();
 document.getElementById('admbtn').addEventListener('click',admToggle);
 document.getElementById('brandhome').addEventListener('click',vDash);
@@ -973,3 +988,5 @@ vDash();
 </script>
 </body>
 </html>
+ 
+
