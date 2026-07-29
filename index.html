@@ -79,6 +79,7 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .studysec .snum{width:26px;height:26px;border-radius:7px;background:var(--teal);color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .studysec .stitle{flex:1}
 .studysec .chev{color:var(--teal);font-size:14px;transition:.2s;flex-shrink:0}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--teal-soft);color:var(--teal-dk);flex-shrink:0}
 .coverimg{max-width:100%;border-radius:9px;border:1px solid var(--line);margin-top:12px;display:block}
 .togbar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:9px;border:1.5px dashed var(--line);border-radius:9px;color:var(--teal);font-weight:600;font-size:13.5px;transition:.15s}
 .togbar:hover{border-color:var(--teal);background:var(--teal-soft)}
@@ -102,6 +103,7 @@ h2.sec{font-size:18px;font-weight:700;margin:22px 0 10px}
 .qprog{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0}
 .qprog i{display:block;height:100%;background:var(--teal);transition:.3s;border-radius:99px}
 .qcard{padding:24px}
+.qtimer{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .qnum{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 .qtext{font-size:17px;font-weight:650;margin:8px 0 18px;line-height:1.45}
 .opt{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:9px;cursor:pointer;transition:.12s}
@@ -157,14 +159,14 @@ footer.app{max-width:1100px;margin:0 auto;padding:26px 16px;color:var(--muted);f
 <body>
 <header><div class="hbar">
   <div class="brand" id="brandhome">
-    <span class="k">SDMBRK COLLECTIONS</span>
     <span class="t">Regulatory Learning &amp; Certification Portal</span>
   </div>
   <div class="hspace"></div>
+  <button class="adm-pill" id="namebtn">👤 Set name</button>
   <button class="adm-pill" id="admbtn">Admin: OFF</button>
 </div></header>
 <div class="wrap" id="app"></div>
-<footer class="app">Regulatory Learning &amp; Certification Portal · Built for site &amp; office use · <b>Sdmbrk Collections</b></footer>
+<footer class="app">Regulatory Learning &amp; Certification Portal · <sup>™</sup>&nbsp;<b>Sdmbrk Collections</b></footer>
 <div class="toast" id="toast"></div>
 <script>
 function el(tag,attrs,kids){var n=document.createElement(tag);attrs=attrs||{};
@@ -189,9 +191,40 @@ function secImgs(s){return s.imgs||(s.img?[s.img]:[]);}
 var LS='rlcp_v1';
 var S=null;
 function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){toast('Save failed — storage may be full (large images). Remove some images.');}}
+function refreshSectionContent(title){
+  var dc=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc=c;});
+  if(!dc)return;
+  var fresh=seedOfficialParts().filter(function(s){return s.title===title;})[0];
+  if(fresh){
+    var idx=-1;dc.sections.forEach(function(s,i){if(s.title===title)idx=i;});
+    if(idx>=0)dc.sections[idx].notes=fresh.notes;else dc.sections.push(fresh);
+  }
+  var freshQs=seedQuestions().filter(function(q){return q.sec===title;});
+  var existingQTexts={};dc.questions.forEach(function(q){existingQTexts[q.q]=true;});
+  freshQs.forEach(function(q){if(!existingQTexts[q.q])dc.questions.push(q);});
+}
+function hardResetSection(title){
+  var dc=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc=c;});
+  if(!dc)return;
+  dc.sections=dc.sections.filter(function(s){return s.title!==title;});
+  dc.questions=dc.questions.filter(function(q){return q.sec!==title;});
+  var fresh=seedOfficialParts().filter(function(s){return s.title===title;})[0];
+  var origIdx=-1;
+  seedOfficialParts().forEach(function(s,i){if(s.title===title)origIdx=i;});
+  if(fresh){
+    if(origIdx>=0&&origIdx<dc.sections.length)dc.sections.splice(origIdx,0,fresh);else dc.sections.push(fresh);
+  }
+  var freshQs=seedQuestions().filter(function(q){return q.sec===title;});
+  freshQs.forEach(function(q){dc.questions.push(q);});
+}
 function load(){
   try{S=JSON.parse(localStorage.getItem(LS));}catch(e){S=null;}
-  if(!S){S=seedState();S.ver=4;save();return;}
+  if(!S){
+    S=seedState();
+    var dcFresh=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dcFresh=c;});
+    if(dcFresh)materializeAcronymQuestions(dcFresh);
+    S.ver=18;save();return;
+  }
   if(!S.ver||S.ver<2){
     var dc=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc=c;});
     if(dc){
@@ -208,6 +241,79 @@ function load(){
   if(S.ver<4){
     S.cats.forEach(function(c){if(!c.passMark)c.passMark=70;});
     S.ver=4;
+  }
+  if(S.ver<5){
+    var dc2=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc2=c;});
+    if(dc2){dc2.sections=seedOfficialParts();}
+    S.ver=5;
+  }
+  if(S.ver<6){
+    var dc3=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc3=c;});
+    if(dc3){
+      var freshK=seedOfficialParts().filter(function(s){return s.title==='Part K — Villas';})[0];
+      var kIdx=-1;dc3.sections.forEach(function(s,i){if(s.title==='Part K — Villas')kIdx=i;});
+      if(kIdx>=0)dc3.sections[kIdx].notes=freshK.notes;else dc3.sections.push(freshK);
+      var freshQs=seedQuestions().filter(function(q){return q.sec==='Part K — Villas';});
+      var existingQTexts={};dc3.questions.forEach(function(q){existingQTexts[q.q]=true;});
+      freshQs.forEach(function(q){if(!existingQTexts[q.q])dc3.questions.push(q);});
+    }
+    S.ver=6;
+  }
+  if(S.ver<7){
+    refreshSectionContent('Part J — Security');
+    S.ver=7;
+  }
+  if(S.ver<8){
+    refreshSectionContent('Part H — Indoor Environment');
+    S.ver=8;
+  }
+  if(S.ver<9){
+    refreshSectionContent('Part G — Incoming Utilities');
+    S.ver=9;
+  }
+  if(S.ver<10){
+    refreshSectionContent('Part F — Structure');
+    S.ver=10;
+  }
+  if(S.ver<11){
+    hardResetSection('Part E — Building Envelope');
+    S.ver=11;
+  }
+  if(S.ver<12){
+    hardResetSection('Part D — Vertical Transportation');
+    S.ver=12;
+  }
+  if(S.ver<13){
+    hardResetSection('Part C — Accessibility');
+    S.ver=13;
+  }
+  if(S.ver<14){
+    hardResetSection('Part B — Architecture');
+    S.ver=14;
+  }
+  if(S.ver<15){
+    hardResetSection('Part A — General');
+    S.ver=15;
+  }
+  if(S.ver<16){
+    var dc4=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc4=c;});
+    if(dc4&&(!dc4.quizCount||dc4.quizCount<50))dc4.quizCount=50;
+    S.ver=16;
+  }
+  if(S.ver<17){
+    var dc5=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc5=c;});
+    if(dc5){
+      if(!dc5.acronyms)dc5.acronyms=buildAcronymList();
+      if(dc5.acronymQuizCount===undefined)dc5.acronymQuizCount=5;
+      var hasAcrSec=false;dc5.sections.forEach(function(s){if(s.title==='Acronyms & Abbreviations')hasAcrSec=true;});
+      if(!hasAcrSec)dc5.sections.push(buildAcronymSection());
+    }
+    S.ver=17;
+  }
+  if(S.ver<18){
+    var dc6=null;S.cats.forEach(function(c){if(c.id==='dubai-codes')dc6=c;});
+    if(dc6)materializeAcronymQuestions(dc6);
+    S.ver=18;
   }
   save();
 }
@@ -231,7 +337,8 @@ function seedState(){
       { id:'dubai-codes', name:'Dubai Codes', icon:'🏗️', active:true,
         desc:'Dubai Building Code (DBC 2021) — study notes, reference documents and certification exam.',
         docs:[], sections: seedOfficialParts(), questions: seedQuestions(),
-        examName:'Dubai Building Code Certification', quizCount:20, passMark:70 },
+        acronyms: buildAcronymList(), acronymQuizCount:5,
+        examName:'Dubai Building Code Certification', quizCount:50, passMark:70 },
       { id:'dewa', name:'DEWA Regulations', icon:'⚡', active:false,
         desc:'DEWA Regulations for Electrical Installations — coming soon.',
         docs:[],sections:[],questions:[],examName:'DEWA Regulations Certification',quizCount:20,passMark:70},
@@ -291,21 +398,24 @@ function seedOfficialParts(){
 "## C.4 — Accessibility General Requirements\n- Part C applies to all new buildings/facilities and common parts of multi-occupancy residential; it does NOT apply to individual villas/townhouses (see Part K instead).\n- People of determination must receive an equal level of emergency protection (alarm, refuge, evacuation) as everyone else — cross-referenced to UAE FLSC.\n- Wherever a building segregates by gender, BOTH genders must receive the same level of accessibility.\n\n## C.5 — Accessible Routes & Circulation\n- At least one accessible route must connect: site arrival points (parking, sidewalks, transit stops) → accessible entrance → every storey/mezzanine → every accessible space/element within the building.\n- Accessible route widths: external 1,200 mm min (1,800 mm recommended for two-way/heavy traffic); internal 1,000 mm min (1,200 mm recommended); turning/direction-change spaces 1,500 mm min.\n- Passing spaces (1,500×1,500 mm) required at max 50 m intervals where route is under 1,500 mm wide.\n- Max running slope before a ramp is required: 5%; max cross-slope: 2%. Clear height along the route: 2,100 mm minimum.\n- Floor irregularities max 5 mm; uneven surfaces and unprotected level changes must be avoided; tactile warning surface required before any sudden level change.\n- Minimum number of accessible entrances (Table C.2): 1–2 pedestrian entrances → 1 accessible; 3–4 → 2 accessible; >4 → 50% of entrances; assembly/mall/retail/educational/healthcare → 100% of entrances accessible.\n- Protruding objects: nothing below 2,100 mm may protrude more than 100 mm into the route unless it extends to the floor or has a cane-detectable element ≤300 mm from the floor.\n## Reach Ranges (adults)\n- Unobstructed forward reach: 400 mm (low) to 1,200 mm (high). Unobstructed side reach: same range.\n- Obstructed forward reach: reach depth ≤500 mm → high reach 1,200 mm max; 500–600 mm depth → high reach drops to 1,100 mm max.\n- Children's reach ranges (Table C.10): ages 3–4 → 500–900 mm; ages 5–8 → 450–1,000 mm; ages 9–12 → 400–1,100 mm.\n- Switches/controls/sockets: mounted 400–1,200 mm above floor (precision controls 750–1,000 mm); min 300 mm from any corner.\n## Accessible Doors\n- Single doors (except toilets) min 915 mm clear width, 90° opening; double-leaf active leaf min 915 mm; toilet doors min 815 mm.\n- Threshold max 13 mm rise, bevelled to 6 mm, max 50% slope gradient. Opening force ≤25 N unless powered.\n- Door hardware (levers/handles/pulls): mounted 865–1,220 mm above floor, ≥40 mm off the door face; round knobs/thumb latches NOT permitted; closers min 5 s closing time.\n- Manoeuvring clearances (Table C.11) — front approach pull side 1,500 mm wide × 450–600 mm adjacent space; push side 1,200 mm × 300 mm; side approach hinge-pull 1,500 mm × 900 mm; sliding doors 1,200 mm × 300 mm both sides.\n- Public building entrances: all accessible doors shall be power-operated.\n## Ramps\n- Required whenever gradient exceeds 5%. Slope table (Table C.13): rise >1,000 mm → 5–6% recommended / 8.33% max; 500–1,000 mm rise → ≤7% (max 8.33%); <500 mm rise → ≤8% (max 8.33%).\n- Landings required if a ramp run exceeds 10 m; landing min 1,500×1,500 mm at both ends and at any direction change.\n- Ramp clear width (between handrails) min 1,000 mm; cross-slope max 2%.\n- Handrails: 865–965 mm high (plus a child rail at 650–750 mm) on both sides if rise >300 mm; extend 300 mm min beyond top/bottom of each run.\n## Elevators & Lift Platforms\n- At least one accessible elevator required in every building with more than one floor (limited exemptions: two-storey restaurants meeting specific parity conditions, plant rooms, small G+1 buildings <250 m², mosques with accessible ground-floor prayer halls).\n- Accessible cabin sizes (Table C.15): one-entrance cabin min 1,200×1,500 mm (1,500×1,500 recommended); two-opposing-entrance same; stretcher cabin min 1,100×2,100 mm.\n- Door: min 900 mm wide, 2,100 mm high, automatic, min 3 s open, reopen force ≤135 N on obstruction.\n- Manoeuvring space 1,500×1,500 mm in front of doors and hall call button. Buttons 900–1,200 mm high with embossed Arabic numerals + Braille; two handrails at 900±100 mm.\n- Lift platforms (alternative to elevators only where structurally necessary): 900 mm min access width; handrails 865–965 mm; control buttons 900–1,200 mm; open-cabin max travel height 2,000 mm (public) / 3,000 mm (private).\n!! Elevator accessibility exemptions are narrow and specific — don't assume a small building is automatically exempt; check the listed conditions exactly.\n\n## C.6 — Building Access & Vehicular Requirements\n- Curb ramps: running gradient max 8%; curb height 75–150 mm; total width ≥1,200 mm matching the crossing; cross-slope max 2%; tactile warning paving 300 mm from curb edge.\n- Accessible parking count (Table C.17): 25–500 total bays → 2% (min 1); >500 bays → +1% per additional bay over 500; buildings without parking (admin HQ, hospitals, schools, sports, clinics) → minimum 2 bays within 50 m of entrance.\n- Accessible parking dimensions: car angled/perpendicular 2.5×5.5 m; car parallel 2.5×6.0 m; accessible van 3.35×5.5 m.\n- Location rules: max 50 m from building/accessible entrance; at least one adjacent to each accessible entrance; access aisle ≥1,200 mm wide.\n\n## C.7 — Accessible Building Elements\n- Windows: opening force ≤22.2 N; controls 900–1,200 mm high; glazed opening bottom ≤900 mm above floor for views (no transom between 900–1,200 mm) where practical.\n- Floor slip resistance (pendulum test PTV, Table C.19): indoor dry level surfaces 15–35 PTV; outdoor/wet level surfaces 35–45 PTV; inclined ≥5% slope surfaces need 35+ (indoor) or 45+ (outdoor/wet).\n- Floor level differences max 5 mm (or ramped at max 25% for ≤13 mm changes); carpet pile max 13 mm; entrance-lobby carpet max 5 mm height difference from surrounding floor.\n- Tactile warning surfaces: truncated-cone grid, min 300 mm from hazard edge, min 300 mm wide, at all level changes/stairs/ramps/obstacles.\n- Tactile guiding surfaces: min 400 mm wide, longitudinal strips max 32 mm apart, oriented in direction of travel — required in open squares, transit hubs, and between entrances/reception/elevators in public admin buildings.\n- Glass manifestation: required on glass that could be mistaken for an opening/door; band located 750–1,500 mm above FFL, min 50% opacity per 900 mm width interval.\n- Storage/lockers: min 20% of units within 600–1,200 mm reach height.\n- Accessible table height 700–850 mm knee clearance; seating height 430–480 mm, backrest 400–500 mm high.\n- Accessible counters: max 850 mm height, min 900 mm width; ≥1 of each counter type accessible; if sales area >500 m², 20% of counters accessible.\n!! Slip resistance requirements differ for wet vs dry areas — always specify per-area PTV, not one blanket spec.\n\n## C.8 — Accessible Sanitary\n- Minimum accessible toilets (Table C.20): public buildings — 1 accessible facility within 150 m OR one per gender per floor/toilet group; public open spaces (parks/beaches) — within 400 m OR one unisex accessible toilet per floor/group.\n- Fixture minimums (Table C.21): ≥5% of water closets (min 1 per toilet group) wheelchair accessible; ≥1 accessible urinal per urinal group; ≥1 accessible sink per sink group; ≥1 accessible shower/bathtub per bathing area.\n- Accessible toilet stall clear manoeuvring space: 1,500 mm diameter free of obstacles up to 700 mm height; 1,050 mm clear space in front of the door.\n- Water closet: seat height 450–500 mm; grab bars — transfer bars 750–900 mm long, mounted 700–850 mm high; vertical bar 600 mm long at ≥800 mm height, max 300 mm in front of WC.\n- Urinals: bottom lip max 400 mm; min 350 mm deep; interaction space 800×1,300 mm; grab bars each side, max 380 mm from centreline.\n- Sinks: knee clearance 700 mm high × 250 mm deep; usable surface 800–850 mm high; interaction space 800×1,300 mm.\n- Showers: transfer type 900×900 mm; roll-in type 800×1,500 mm min; seat height 450–500 mm; grab bars 700–850 mm high, 750–900 mm long.\n- Family toilets: recommended one per toilet block, mandatory within 300 m; required in malls/parks/amusement parks; manoeuvring space min 2,000 mm diameter, includes adult + child changing boards, second child sink at 500 mm height, urinal at 400 mm.\n- Grab bars (general): circular cross-section 30–50 mm diameter, 45 mm min wall clearance, must withstand 1 kN force in any direction.\n- Drinking fountains: two heights provided — 750–1,200 mm and an accessible one at 750–900 mm.\n\n## C.9 — Accessibility Features in Buildings\n- Hearing enhancement systems (induction loop/infrared/RF) mandatory in: reception areas, meeting/waiting rooms >25 people, auditoriums, service counters, theatres, mosques, cinemas, concert halls.\n- Receiver counts (Table C.24): ≤50 occupants → 2 receivers; 51–500 → 2 + 1 per 25 over 50; 501–1,000 → 20 + 1 per 50 over 500.\n- Service animal relief facilities recommended in large buildings: min 3,000×4,000 mm, 1,200 mm fence, connected to accessible route (not directly into occupied spaces).\n\n## C.10 — Accessibility for Specific Building Types\n- Auditorium wheelchair spaces (Table C.26): 1 space per 50 seats up to 500 seats, then 1 per 100 seats above 500. Companion seats for 50% of wheelchair spaces.\n- Wheelchair space dimensions: single 900 mm wide, two adjacent 850 mm each; front/rear approach 1,300 mm deep, side approach 1,500 mm; manoeuvring space 1,500×1,500 mm.\n- Mosques/prayer rooms: \"KEEP CLEAR\" mat at entrance if space not guaranteed; accessible toilet + ablution space required per gender in each prayer room.\n- Residential adaptable units: new developments with >10 units → min 2% of units + all common areas must be adaptable; kitchen manoeuvring 1,200 mm (1,500 mm where turning required); walls must support 1.5 kN/m² grab-rail loading.\n- Hotel accessible rooms with mobility features (Table C.27): 50–500 rooms → 2% of rooms; >500 → +1% over 500. 50% of these need roll-in showers, 50% need accessible bathtubs.\n- Hotel accessible rooms with communication features (Table C.28): 50–500 rooms → 4%; >500 → +2% over 500.\n- Business/industrial: accessible workstation access aisles min 1,000 mm; lighting min 200 lux at work areas.\n!! Hotel accessible-room percentages (mobility vs communication features) are separate provisions with separate counts — don't merge them into one number.\n\n## C.11 — Signage & Wayfinding Accessibility\n- Text signage: English + Arabic, glare-free, high reflectance contrast; text-to-background contrast min 50 points LRV; pictograms per ISO 7000.\n- Sign mounting: general wall signs centred at 1.5 m height (1.25 m max if primarily for children).\n- Tactile/raised signage: characters raised min 0.8 mm, 16–50 mm high; symbol height min 30 mm; Braille located below the visual text, min 10 mm from sign edge/border.\n- Tactile maps: max horizontal size 800×450 mm; mounted 1,250–1,750 mm (vertical) or 900–1,200 mm (horizontal, 30–45° incline).\n- Communication combinations: an accessible communication process needs at least 2 of the 3 channels (acoustic, visual, tactile) combined — e.g. alphabetical writing + Braille, or light signal + simultaneous sound signal."},
     {id:uid(),title:'Part D — Vertical Transportation',imgs:[],notes:
 "## D.1 — Performance Statement\n- The building shall provide a safe, sustainable, adequate and effective vertical transportation service — met by following D.4 to D.9.\n\n## D.4 — General\n- Vertical transportation (VT) covers elevators, escalators and moving walks.\n- Two design methods for minimum passenger elevator count: Method 1 — prescriptive, predefined numbers for single-occupancy buildings (D.8); Method 2 — performance-based design parameters for mixed-use/complex buildings, requires a VT Consultant (D.9).\n- Accessible elevator requirements are defined in Part C (C.5.9.3), not repeated here.\n\n## D.5 — Safety & Reliability\n- VT shall be designed/installed/tested/commissioned/maintained to ONE suite of standards only — either ASME A17 OR BS EN 81. The two suites shall never be mixed on a project.\n- Firefighting elevators additionally conform to UAE FLSC Section 2.9 Ch.2 and Section 3.9 Ch.3, regardless of chosen suite.\n- Escalators/moving walks require enhanced handrail protection at entry points.\n\n## D.6 — Energy Conservation\n- Elevators: AC variable voltage/variable frequency (VVVF) drives on non-hydraulic units; energy-efficient lighting (>70 lumens/circuit-Watt) that auto-shuts after max 5 min inactivity; standby mode for off-peak.\n- Escalators/moving walks: reduce to slower speed after max 3 min no activity; full shutdown after max 15 min no activity (soft-start on restart); photocell detectors at top/bottom landings for both features.\n\n## D.7 — Location & Arrangement of Passenger Elevators\n- Elevators located in the entrance lobby, near the main entrance(s); separated from enclosed parking by an air-conditioned lobby; residential unit doors must NOT open directly into an elevator lobby.\n- Max horizontal travel distance from elevator lobby (Table D.1): residential/hotel 60 m (to furthest unit/guestroom door); open-plan office 60 m; retail/mall/assembly/educational 150 m.\n- Elevator core: max 4 elevators per core; max 8 elevators sharing one lobby (conventional control).\n- In-line arrangement: max 4 elevators, min 2.4 m clearance in front (residential typical floors may reduce to corridor width or 1.8 m, whichever greater).\n- Facing arrangement: max 8 elevators total, distance between cores = greatest of 2.4 m min / 2× deepest cabin depth / 1.5× firefighting cabin depth, capped at 4.5 m max.\n\n## D.8 — Design Method 1: Prescriptive Elevator Counts\n- Based on: building type, population, occupied floors, boarding floors, elevator grouping. Only for single-occupancy buildings with associated parking/retail — NOT for mixed-use (e.g. 50% hotel/50% office needs Method 2).\n- Service elevators (Table D.2 samples): residential 1 minimum (firefighting/passenger elevator may double as service, with scheduled service-mode operation); hotel 1–2-star 1 (+1 per 200 keys over 250); 4–5-star 2 (+1 per 200 keys over 500); office 1; retail/mall 1 (+1 per 100 outlets over 75).\n- Firefighting elevators: mandatory in malls, multi-storey amusement parks, and any high-rise/super high-rise/high-depth building; must access every floor; own dedicated fire-rated RCC shaft; NOT permitted as goods lifts (but permitted as service elevators).\n- Passenger elevator rated speed set from minimum travel-time tables (Table D.4 samples): residential apartments 40–45 s; hotel 4–5-star 20–25 s; office regular 25–30 s; healthcare 25–30 s.\n- Population/occupancy rates used for elevator selection charts: residential apartments — studio 1.5, 1BR 1.8, 2BR 3, 3BR 4, 4BR 5 persons (+1 per extra bedroom); staff accommodation — studio/1BR 2, 2BR 4, 3BR 6; student accommodation same as staff; hotel guest occupancy — 1-/2-/3-star 1.5/room, 4-/5-star 1.8/room.\n- Minimum elevator specs vary by building type and floor count — residential ≤10 floors: 750 kg/10 persons minimum cabin, cabin 1,200×1,500 mm, door 900×2,100 mm; residential >10 floors recommended: 1,350 kg/18 persons, cabin 2,000×1,500 mm.\n- Office buildings (D.8.14): elevator count read from Figure D.22 by boarding floors × occupied floors × GA band (10 m²/person occupancy assumption on 80% of GA); beyond the chart's range, a VT Consultant must be appointed.\n- Retail/mall (D.8.15): population at 1 person/5 m² of leasable+circulation area; escalator/elevator counts scale in bands from Table D.22/D.23 (e.g. <600 persons → optional escalator, 1 set of 2 elevators; 4,501–8,000 → 2 escalator groups, 2 elevator sets).\n- Car parking buildings (D.8.16): occupancy 1.5 persons/car (independent) or 3.0 persons/car (mall/mixed-use parking); assumes max 5 floors above/below ground.\n- Schools (D.8.17): fixed at 2 elevators (service/people-of-determination use only, assumes max 5 storeys). Universities (D.8.18): 2 elevators for first 400 people, +1 per additional 300 people; multiple entrances need 2 elevators each.\n!! Design Method 1 charts only cover SINGLE-occupancy buildings within the tables' population/floor range — exceeding the chart range or mixing occupancies always triggers Method 2 with a VT Consultant.\n\n## D.9 — Design Method 2: Performance-Based VT Design\n- Requires a VT Consultant; must include firefighting/evacuation elevators, service elevators, and waste elevators as needed.\n- Handling capacity HC5% ceiling (Table D.32, samples): residential apartments 7%; hotel 4-/5-star 12–15%; office regular/concentrated 12% (rises to 13% during lunch peak); educational/universities 16–20%.\n- Traffic pattern splits (Table D.34, samples): residential morning 35% up/65% down; office morning peak (single tenant) 85% up/10% down/5% inter-floor; educational morning 100% up.\n- Average waiting time ceiling (Table D.35, samples): residential apartment ≤40 s; hotel 4-/5-star ≤30 s; office ≤35 s; retail/educational/healthcare ≤40 s.\n- Capacity factor ceiling (Table D.36): residential apartments 60–80%; hotel 4-/5-star 50%; office 80%; retail 50%; panoramic elevators capped at 70% regardless of building type.\n- Door timing (Table D.38, samples): residential apartments <120 m — 2.2 s open / 3.2 s close; ≥120 m tall — 1.9 s open / 2.8 s close (faster doors improve efficiency but must be manufacturer-achievable).\n- Acceleration/jerk (Table D.39): scales with speed — e.g. 1 m/s → 0.7 m/s² accel / 0.8 m/s³ jerk; ≥5 m/s → 1.2 m/s² / 1.4 m/s³. Bed elevators capped at 0.6 m/s² accel / 1.0 m/s³ jerk regardless of speed.\n- Destination Control Systems (DCS) preferred where: elevators don't serve equal stops, up-peak traffic is demanding, mixed-use floors, or tenant/visitor enrolment access control is used. DCS trades lunchtime-peak performance and single-file-entry reliability for faster time-to-destination and better lobby organisation.\n- Hybrid systems (destination control at the main boarding floor + conventional elsewhere) help overcome DCS lag during lunchtime peaks.\n\n## D.10 — Annex: Design Summaries & Report Templates\n- Design Method 1 projects submit a \"Vertical Transportation Selection Summary\" (project data, estimated population, elevator/escalator/moving-walk counts, Authority review section).\n- Design Method 2 projects submit a fuller \"VT Performance Approval Summary\" (per-group population, handling capacity, waiting/destination times, speed, door timing, acceleration/jerk) plus a VT Consultant report covering assumptions, selection rationale, traffic analysis and Authority requirements."},
-    {id:uid(),title:'Part E — Building Envelope',imgs:[],notes:placeholder('DBC Part E (Building Envelope)','covers façade, insulation, waterproofing and thermal performance requirements.')},
+    {id:uid(),title:'Part E — Building Envelope',imgs:[],notes:
+"## E.4 — Structural\n- The envelope must safely sustain and transmit ALL static and dynamic loads (dead, imposed, thermal, seismic, wind) to the supporting structure, with both vertical support and horizontal restraint, while accommodating differential movement (settlement, inter-storey drift).\n- Fixings: selected on proven performance (ETA/BS/EN/ASTM test data); must never be welded; design must address the consequence of any single fixing failing.\n- Operational forces: horizontal load per ASCE/SEI 7-16 Section 4.5.1; PLUS a uniformly distributed 0.6 kN/m² or a 1 kN point load (whichever is more onerous) anywhere on internal ledges/horizontal framing/surfaces; plus loads from cleaning cradles and anchor points.\n- Any envelope part protecting a change in level >760 mm needs either structural resistance per ASCE 4.5.1 OR a guardrail per B.4.2.5.2 — same 760 mm threshold used throughout the DBC.\n## Deflection Limits (Table E.1)\n| Component | Max deflection |\n| Storey-height assemblies (span ≤3,000 mm) | 1/200 |\n| Storey-height assemblies (3,000–7,500 mm) | 5 mm + 1/300 |\n| Storey-height assemblies (span ≥7,500 mm) | 1/250 |\n| Opaque infill panels — brittle (stone) | 1/360 |\n| Opaque infill panels — non-brittle (aluminium/steel) | 1/90 |\n| Single glass framing | 1/125 of member span |\n| Double-glazed unit framing | 1/175 of unit span |\n## Impact Resistance (Table E.2 — minimum test energy for opaque areas)\n| Exposure zone | Soft body safety/serviceability | Hard body safety/serviceability |\n| Within 1.5 m of ground/FFL (public accessible) | 500 J / 120 J | 10 J / 10 J |\n| Within 1.5 m of ground (other accessible) | 500 J / 120 J | 10 J / 6 J |\n| 1.5–6 m above ground | 350 J / 120 J | 10 J / 6 J |\n| >6 m above ground | 350 J / 120 J | 3 J / 3 J |\n- Structural glass without load-bearing framing needs redundancy — if it breaks, adjacent components must share the load. Structural silicone follows ETAG 002.\n!! The 760 mm guardrail-or-structural-resistance threshold in E.4 mirrors the 760 mm fall-protection threshold in Part B — the same number recurs across Parts, worth memorising once.\n\n## E.5 — Energy Conservation\n- Two compliance routes: **Elemental Method** (prescriptive limits below) or **Performance Method** (dynamic thermal modelling comparing the proposed building's annual energy use against an identical reference building per ASHRAE 90.1:2019 Appendix G).\n## Elemental Method Requirements\n- Max window-to-wall ratio (WWR), except shopfronts: 40% of gross wall area for residential; 60% for all other building types.\n- Glazing percentage by orientation (Table E.3): North ≤80%; NE ≤70%; E ≤60%; SE ≤40%; S ≤40%; SW ≤40%; W ≤60%; NW ≤70%.\n- Non-glazed thermal transmittance (Table E.4): Roof ≤0.3 W/m²K; external wall & exposed floor ≤0.57 W/m²K. Ground-contact floors need 1 m of perimeter insulation to meet this.\n- Glazed vertical surfaces (Table E.5, by total glazed area): <40% → U≤2.1, SC≤0.4, light transmittance ≥40%; 40–60% → U≤1.9, SC≤0.32, LT≥32%; >60% → U≤1.7, SC≤0.25, LT≥25%.\n- Shopfronts/showrooms except ground floor (Table E.6): U≤1.9, SC≤0.76.\n- Skylights (Table E.7): ≤10% of roof glazed → U≤1.9, SC≤0.32, LT≥32%; >10% → U≤1.9, SC≤0.25, LT≥25%.\n- Thermal bridges (fasteners, beams, balcony slabs) must be eliminated or insulated in all new air-conditioned buildings.\n- Heat island reduction (Table E.8, min 75% of roof area): steep roofs (>1:6 slope) SRI ≥29; flat/low roofs (≤1:6) SRI ≥78; external walls SRI ≥29.\n- Exterior lighting: power density ≤2.2 W/m² per illuminated surface OR ≤16.4 W/linear metre; fixtures shielded so light projects below the horizontal plane at the fixture's lowest point (except accent lighting/aviation safety); wall-washing spill capped at 10% past the façade; signage lit downward; all exterior lighting on automatic daylight-off controls.\n!! Orientation-based glazing caps (Table E.3) are a favourite exam trap — note that South/Southeast/Southwest are the STRICTEST at ≤40%, not North.\n\n## E.6 — Sustainable Materials\n- Construction materials for the envelope follow the same B.10.6 rules already covered under Part B: ≥10% recycled content by value, ≥10% regional materials (within 800 km), no asbestos, ≥25% certified/accredited timber by volume.\n\n## E.7 — Moisture\n- Envelope must protect against: ground moisture, precipitation (including windblown spray), and interstitial/surface condensation.\n- Damp-proof course (where no groundwater pressure applies): minimum 150 mm above adjoining ground level, continuous with any floor damp-proof membrane. Walls under groundwater pressure follow BS 8102 instead.\n- Horizontal/inclined surfaces must be either jointless+impermeable, OR sealed-joint+impermeable, OR overlapping-joint with either impermeability or a backing material directing water outward.\n- Vertical wall types: solid walls must hold rainwater until a dry period without damage; cavity/rainscreen walls need a drained air space (or must stop water reaching the inner leaf); curtain wall/door/window joints must resist penetration entirely.\n- Flashing required at: door/window perimeters, wall penetrations/terminations, wall-to-roof/balcony intersections, and built-in gutters.\n- Condensation control: structural/thermal performance must not be compromised by interstitial condensation, and no surface condensation or mould growth may occur. Techniques: thermal breaks in glazed framing, a vapour resistance layer in roofs/solid walls, and continuity of that layer across junctions.\n\n## E.8 — Acoustics\n- The building envelope's external noise protection performance is governed entirely by Part H (H.10) — no separate acoustic requirements are set within Part E itself.\n\n## E.9 — Protection from Falling, Collision & Impact\n- Safety glazing required at critical locations: doors, door side panels, and low-level glazing.\n- Classification (Table E.9, per BS EN 12600): low-level areas at any height → Class 1; doors below 900 mm FFL → Class 2; door side panels above 900 mm FFL → Class 3.\n- Alternative classification (Table E.10, by glazed area in a critical location): ≤0.9 m² → ANSI Z97.1 Class A / CPSC 16 CFR 1201 Class I; >0.9 m² → ANSI Class B / CPSC Class I.\n- Containment: any glazing below 800 mm FFL protecting a level change >760 mm must provide containment (a glass barrier that resists penetration and keeps people from falling even after it breaks). If one glazing panel spans both above and below 800 mm, the ENTIRE panel needs containment.\n- Manifestation (markings making glass visible as a hazard): required adjacent to doors, on frameless/handle-less doors, and anywhere occupants might inadvertently contact the glazing. Band located 750–1,500 mm above FFL, covering ≥50% of the area per 900 mm width interval at ≥50% opacity.\n- Manifestation is NOT required where: the glass is <500 mm wide; it doesn't extend more than 850 mm above FFL; a fixed element blocks the entire approach; or it's upper-floor façade glazing with no outside access and no confusion risk.\n- Window safety: sliding/operable windows located ≥900 mm above FFL; opening restrained to a max 100 mm gap to prevent falls; no ladder-like features at the window base; controls/handles positioned per Part C reach ranges (900–1,200 mm) or fitted with remote operation if that's impractical.\n- Overhead glazing (skylights) must be laminated with a post-breakage containment system so broken glass stays in place until replaced (per CWCT TN 66/TN 67).\n!! The 800 mm containment threshold and the 760 mm structural/guardrail threshold are DIFFERENT numbers for DIFFERENT triggers — don't conflate them.\n\n## E.10 — Fire Safety\n- External fire spread is prevented by EITHER physically separating the building from adjacent plots OR fire-resistance-rating the envelope.\n- The DBC's own rules supersede two specific UAE FLSC clauses: guardrails/balustrades (UAE FLSC Ch.1 §2.17) are superseded by B.4.2.5.2; safety glazing (UAE FLSC Ch.1 §5.4.2–5.4.4) is superseded by E.9.\n- Sprinklers on balconies, and on the inside of rainscreen/glazing/curtain-wall systems, are NOT mandated by Dubai Civil Defence provided the construction materials conform to UAE FLSC Ch.1.\n- Fire-rated spandrels (normally min 915 mm per UAE FLSC §2.8.10) may be reduced if the perimeter barrier system is tested, certified and listed for the intended spandrel specification.\n- Non-fire-rated non-loadbearing façades/mashrabiya: the DBC expands UAE FLSC's exception list to include concrete, terracotta, glass, ceramics and mineral wool, and additionally permits solid metal panels (see below). Steel flashing around windows is NOT required; flashing instead must match what was used in the governing NFPA 285 fire test.\n## Solid Metal Panels (Tables E.11–E.13)\n- Non-fire-rated façades on super/high-rise, malls, theme parks, schools, hospitals, assembly buildings: panel tested to BS EN 13501-1 Class A1 or A2-s1-d0; façade assembly tested to BS 8414-1/2 (BR 135 pass criteria) or NFPA 285 / FM 4881 / ISO 13785-2 (\"pass\").\n- Same façades on low/mid-rise, warehouse, industrial buildings: panel Class B-s1-d0 (façade tests unchanged).\n- On a fire-resistance-rated wall assembly (any occupancy/height): panel Class A1/A2-s1-d0; façade tested to ASTM E119 / UL 263 / BS EN 1364-3 / BS EN 1364-4 for the required 1 h / 2 h / 3 h rating.\n- Roofing (sprinklered buildings): exterior exposure tested to NFPA 256 / ASTM E108 / BS EN 13501-5 / UL 790, Class B.\n- Roofing (non-sprinklered, or within 6 m of an adjacent building, or malls/assembly/hospitals/educational): stricter Class A/Class 1 exterior exposure test PLUS an interior/under-deck test (FM 4450, UL 1256, or FM 4470/4471 depending on system type).\n- Signboards/billboards on façades >50 m² cumulative area, or straddling more than one storey, must be fire tested as part of the façade system.\n- Solar PV panels follow UAE FLSC Ch.14 §2.2; façade-integrated PV must ALSO be fire tested per Ch.1 §4.\n!! Solid metal panel fire classification depends on BOTH the building type/height AND whether the wall is fire-resistance-rated — check both variables before citing a test standard.\n\n## E.11 — Screening of Building Equipment\n- All outdoor mechanical equipment — antennas, rooftop plant, refuse storage — should be concealed from public view using solid walls, screens, fences, parapets, enclosures or landscaping (cross-referenced to B.10.2).\n\n## E.12 — Maintenance\n- A safe maintenance method is mandatory: manual (rope access/abseiling) or power-operated (cleaning cradles) systems and Building Maintenance Units (BMUs).\n- Rope access needs permanent dedicated fixed anchors, IRATA-standard practice, and a back-up fall arrest system (typically a separate working line + safety line).\n- Maintenance equipment loading counts as permanent fixture loading (per E.4.1.3).\n- Cable stabilization: hanging lifelines/untensioned cables stabilized at intervals of 61 m or less; cables in constant tension (other than suspension wire ropes) stabilized at intervals of 183 m or less.\n- Building anchors must sustain 4× the maximum anticipated load without failure; minimum design wind load per anchor is 1,334 N or the building's design wind load, whichever is higher; anchors must be corrosion-resistant and free of sharp edges.\n- Power circuits for power-operated systems must be independent, lockable OFF/ON at the primary operating area, and locked ON while in use; may connect to emergency power if available.\n- Two-way voice communication is mandatory between equipment operators and personnel stationed inside the building, continuously manned while equipment is in use.\n- Mandatory safety features on any BMU/glass cleaning cradle include: power-failure provisions, overload safety device, wire rope equalizer limit switch, emergency stop, secondary over-speed brake, slack rope device, lanyard restraint trip assembly, rotational slew limits, wire rope factor of safety, anti-collision bar/handrail details, traversing wheel locking device, and weather-condition monitoring."},
     {id:uid(),title:'Part F — Structure',imgs:[],notes:
-"## Design basis\n- Loads and combinations generally follow international standards adopted by DBC (dead, imposed, wind per local wind maps, seismic zoning for Dubai). Part F mandates ASCE/SEI 7-2016.\n- Durability: concrete cover and mix designed for hot, saline, sulphate-bearing ground conditions — typical severe exposure classes for foundations.\n## Practical site notes\n- Concrete in foundations commonly requires SRC or PC+GGBS/PFA blends with protective coatings + polythene separation per soil report.\n- Curing is critical in UAE summer: retain moisture minimum 7 days; avoid casting large pours in peak afternoon temperatures.\n!! Hot-weather concreting: max concrete temperature at placement is typically 32°C per specifications — check the project spec, plan ice/chilled water with the batching plant."},
+"## F.1\u2013F.4 \u2014 Scope & Performance Statements\n- Primary objective: buildings must safely sustain and transmit all combined dead, imposed (live), wind, thermal and seismic loads to the ground for the intended design life, without structural distress or excessive movement.\n- Structures must avoid damaging adjacent properties/utilities, and remain resilient against disproportionate collapse from accidental loads, explosions or localised structural failures.\n- Standards hierarchy: ASCE 7-16 (Minimum Design Loads) and ACI 318 (Structural Concrete) are primary, alongside relevant Eurocodes (BS EN) and AISC specifications for steel.\n!! Loads are never checked in isolation \u2014 the objective is explicitly COMBINED dead + live + wind + thermal + seismic loading transmitted safely to ground.\n\n## F.5 \u2014 Structural Systems & Robustness\n- Load path continuity: a complete, continuous load path is required from roof level down through gravity AND lateral force-resisting systems (shear walls, core walls, moment frames, diaphragms) to the foundation.\n- Disproportionate collapse resistance (F.5.5): buildings need structural redundancy/integrity to prevent progressive collapse.\n- High-occupancy and high-rise structures require horizontal AND vertical ties, continuous perimeter reinforcement, and key-element design criteria for columns/walls whose failure could compromise a larger structural zone.\n!! \"Key element\" design isn't about every column \u2014 it specifically targets columns/walls whose individual failure would take out a disproportionately large part of the structure.\n\n## F.6 & F.11 \u2014 Materials & Sustainability\n- Reinforced concrete: mixes, durability design, cover to reinforcement and exposure classes follow ACI 318 plus local coastal exposure criteria (protecting against chloride and sulphate attack from aggressive ground).\n- Dubai Sustainable Concrete Baseline (DSCB) Annex (F.11): mandates PARTIAL replacement of Portland cement with supplementary cementitious materials (SCMs) \u2014 GGBS, Fly Ash (PFA) or Silica Fume \u2014 to lower carbon footprint AND increase durability against chemical aggression.\n- Structural steel & fasteners: design follows AISC 360 / BS EN 1993; hot-dip galvanizing or protective anti-corrosion coating is required for structural members exposed to outdoor atmospheric conditions.\n- Prohibited materials: uncertified, high-toxicity or asbestos-containing structural materials are strictly forbidden.\n!! DSCB (F.11) SCM replacement is MANDATORY, not optional best-practice \u2014 and it serves two purposes at once: lower embodied carbon AND better durability against Dubai's aggressive ground/coastal chemistry.\n\n## F.7 \u2014 Structural Loading Specifications\n- Dead loads (D): based on actual material densities of structural elements, architectural finishes, MEP equipment and permanent partitions.\n- Imposed/live loads (L): determined by occupancy classification per ASCE 7-16 / Dubai Municipality minimum guidelines.\n- Wind loads (W): engineered per ASCE 7-16, adjusted for local Dubai wind speed records; tall, slender or geometrically complex structures require site-specific Wind Tunnel Testing (aerodynamic pressures, vortex shedding, cladding loads).\n- Seismic design (E): accounts for regional fault lines/tectonic activity; standard structures use Risk Category II (or higher for critical facilities) per ASCE 7-16; seismic acceleration parameters (Ss, S1) and damping metrics are specified in the F.10 Annex.\n!! Wind Tunnel Testing isn't universal \u2014 it's specifically triggered by being tall, slender or geometrically complex. A standard low/mid-rise box-shaped building typically doesn't need it.\n\n## F.8 \u2014 Performance & Serviceability Limits\n- Deflection limits: vertical deflection of beams/slabs/cantilevers under service loads must stay within strict span-to-deflection ratios (\u2264L/360 or L/480 depending on attached non-structural elements), to prevent partition cracking and glazing damage.\n- Lateral drift & stability: inter-storey drift limits under wind/seismic combinations must satisfy ASCE 7 performance caps; high-rise buildings must also limit dynamic acceleration and human-comfort vibration under wind excitation.\n- Crack width control: RC elements in humid/coastal outdoor or underground environments must limit calculated crack widths, to protect durability and prevent rebar corrosion.\n!! L/360 vs L/480 depends on what's ATTACHED to the element \u2014 the same beam can have a different deflection limit depending on whether brittle finishes/glazing sit below it.\n\n## F.9 \u2014 Geotechnics, Foundations & Ground Work\n- A comprehensive geotechnical site investigation by a licensed geotechnical laboratory is mandatory before foundation engineering.\n- The Geotechnical Interpretive Report (GIR) must evaluate: soil stratification, allowable bearing capacity, soil salinity, potential liquefaction under seismic events, and seasonal groundwater levels.\n- Shallow foundations (isolated/combined footings, raft/mat slabs) are permitted where upper soil layers give sufficient bearing capacity.\n- Deep/piled foundations (bored cast-in-place, friction or end-bearing piles) are required for heavy loads, high-rise towers, or soft/saline soils.\n- Dewatering during excavation must safeguard adjacent buildings against subsidence/soil loss; ground improvement techniques (dynamic compaction, vibro-flotation, soil mixing) require POST-treatment verification testing.\n!! Ground improvement isn't \"apply and done\" \u2014 post-treatment verification testing is a mandatory separate step confirming the technique actually achieved the required ground properties.\n\n## F.12 Annex \u2014 Precast Stairs & Structural Connection Details\n- Precast flight to precast landing: dowel ties, grouted clearance holes, screed toppings and U-bar links.\n- Precast flight to steel beam: welded shear stud ties and U-bar links.\n- Precast flight to in-situ landing: rebar dowels with nib support configurations.\n!! These three precast stair connection types are matched to what the flight lands on (precast landing / steel beam / in-situ landing) \u2014 the connection detail changes with the receiving element, not just the flight itself.\n\n## Practical site notes\n- Concrete in foundations commonly requires SRC or PC+GGBS/PFA blends with protective coatings + polythene separation per soil report \u2014 consistent with the DSCB SCM mandate in F.11.\n- Curing is critical in UAE summer: retain moisture minimum 7 days; avoid casting large pours in peak afternoon temperatures.\n!! Hot-weather concreting: max concrete temperature at placement is typically 32\u00b0C per specifications \u2014 check the project spec, plan ice/chilled water with the batching plant."},
     {id:uid(),title:'Part G — Incoming Utilities',imgs:[],notes:
-"## Electrical supply\n- Electrical installations must comply with DEWA Regulations for Electrical Installations (current edition) — DBC incorporates/cross-references DEWA.\n- Standard LV system: 400/230 V, 3-phase, 50 Hz, TN-S earthing per DEWA.\n- Cable sizing to IEC 60228 conductor classes; derate for 50°C ambient and grouping.\n- RCD protection (30 mA) required for socket circuits and wet areas.\n## Water & drainage\n- Water supply and drainage per DM / ADSSC-aligned standards; backflow prevention on connections to potable water.\n## Telecommunications\n- Telecom infrastructure follows federal TRA regulations, documented in DBC section G.11.\n!! Incoming utilities cover the connection points into the building — DEWA supply, water, drainage and telecom — coordinate all four with the relevant authority/service provider early in design."},
+"## G.1\u2013G.3 \u2014 Scope & Performance Objectives\n- Part G governs the planning, design, integration and installation of ALL incoming public and private utilities serving buildings/developments in Dubai.\n- Core objectives: (1) safeguard occupants against electrical fire, arc flash and shock hazards; (2) provide metered water distribution to enable consumption monitoring and conservation; (3) coordinate building cooling demand with incoming district cooling infrastructure; (4) establish future-proof telecom infrastructure with open access for multiple service providers.\n!! Part G is specifically about the CONNECTION POINTS into the building \u2014 electrical, water, cooling, gas and telecom \u2014 distinct from Part H (indoor environment once utilities are inside).\n\n## G.4 \u2014 Electrical Systems Design & Installation\n- Electrical installations must comply with DEWA regulations, standard single-line diagrams (SLD), and applicable IEC/BS EN standards.\n- Standard LV system: 400/230 V, 3-phase, 50 Hz, TN-S earthing per DEWA.\n- Cable sizing to IEC 60228 conductor classes; derate for 50\u00b0C ambient and grouping.\n- Earthing & bonding: a dedicated Main Earthing Terminal (MET) connected to foundation earthing electrodes is required; supplementary equipotential bonding is MANDATORY in high-risk wet areas (bathrooms, kitchens, plant rooms).\n- Distribution boards (DBs), sub-main DBs (SMDBs) and main DBs (MDBs) must be accessible for maintenance, well-ventilated and clearly labelled.\n- Isolation switches, RCDs and circuit breakers must be rated for prospective fault currents \u2014 30 mA RCD protection required for socket circuits and wet areas.\n!! Supplementary bonding in wet areas is a SEPARATE requirement from the main earthing terminal \u2014 having a MET connected to foundation electrodes does not itself satisfy the wet-area bonding rule.\n\n## G.5\u2013G.6 \u2014 EV Charging & Renewable Energy\n- EV charging points: mandatory provision of dedicated electrical supply capacity, cable containment and spatial allowance for EV Supply Equipment (EVSE) across residential, commercial and public parking.\n- EV chargers require dedicated RCD protection, proper earthing, and integration with the building's load management system to prevent overload during peak periods.\n- Onsite solar PV: rooftop/fa\u00e7ade-integrated PV systems must strictly conform to DEWA's \"Shams Dubai\" net-metering grid interconnection standards.\n- PV inverters must include automatic anti-islanding protection \u2014 disconnecting PV generation safely during utility grid outages.\n- PV structural mounting and electrical isolation switches must meet Civil Defence fire safety regulations.\n!! Anti-islanding protection exists to protect utility line workers during an outage \u2014 without it, a building's PV system could keep energising a supposedly de-energised grid line.\n\n## G.7 \u2014 Substations & Medium Voltage (MV) Installations\n- Buildings requiring MV supply must provide a dedicated ground-floor or basement DEWA transformer/substation room with direct exterior vehicular access.\n- Transformer rooms require adequate natural/mechanical ventilation, oil containment bunds, and fire-rated wall/door assemblies.\n- High-voltage switchgear, transformers and Ring Main Units (RMUs) must maintain prescribed working clearances and fire suppression barriers.\n!! Direct exterior vehicular access to the substation room is a specific, easily-missed site-planning requirement \u2014 DEWA needs to be able to deliver/replace a transformer without routing through the building interior.\n\n## G.8 \u2014 Liquefied Petroleum Gas (LPG) Systems\n- Centralised LPG systems serving commercial kitchens, food outlets or residential units must comply with Dubai Civil Defence regulations.\n- Gas detection systems, automatic emergency shut-off (solenoid) valves and explosion-proof fittings are MANDATORY in spaces with gas appliances.\n- Bulk LPG storage tanks or cylinder manifolds must sit in open, well-ventilated outdoor areas with clear safety setbacks from building openings and ignition sources.\n!! This is the building-services-infrastructure version of the LPG rule already seen at villa scale in Part K \u2014 outdoor, ventilated, setback from openings/ignition sources, regardless of building type.\n\n## G.9 \u2014 Water Infrastructure & Metering\n- Every incoming water line requires a DEWA-approved smart MASTER water meter to record bulk consumption.\n- Sub-metering is required for individual residential, retail or commercial tenancies, to track localised usage.\n- Direct connection to pump suction lines is PROHIBITED \u2014 incoming water must discharge into a compliant potable water break tank fitted with air gaps and backflow preventers.\n!! \"No direct connection to pump suction\" is an absolute rule, not a preference \u2014 it exists to prevent negative pressure in the incoming main from pulling contamination back into the public network.\n\n## G.10 \u2014 District Cooling Provisions\n- Buildings served by district cooling must allocate dedicated space for an Energy Transfer Station (ETS) \u2014 containing heat exchangers, primary/secondary pumps and control valves.\n- BTU/thermal energy meters are required on primary cooling lines, to measure exact energy consumption (kWh / Ton-hours) transferred from the utility network.\n- Hydronic isolation: primary chilled water (from the district cooling provider) must be physically separated from secondary chilled water circulating within the building.\n!! Hydronic isolation via the ETS heat exchanger is what allows the district cooling provider's primary loop and the building's own secondary loop to stay at different pressures/water chemistry without ever mixing.\n\n## G.11 \u2014 Telecommunications Infrastructure\n- Telecom infrastructure follows federal TRA regulations, documented in DBC section G.11.\n- Main Telecom Room (MTR): multistorey and commercial buildings require an MTR on ground or basement floor, with dedicated cable risers serving Floor Telecom Rooms (FTRs).\n- Infrastructure must support simultaneous connectivity for licensed telecom operators (du AND Etisalat) via shared Optical Distribution Frames (ODF) \u2014 open access, not single-operator lock-in.\n| Building size | FTTH/FTTT configuration |\n| \u2264256 units | 2\u00d732 LC/APC splitters \u2192 SC/APC patch panels \u2192 4-core indoor drop fibre cables |\n| >256 units | Mini ODF splice cabinets, 2\u00d732 port splitters (Etisalat + du), tight-buffer/micro-module LSZH indoor multicore backbone, flat-profile drop cables to tenant outlets |\n- Standardised patch panels: SC/APC and LC/APC connectors, simplex fibre patch cords, and uniform port labelling required across all telecom cabinets.\n!! The 256-unit threshold is the key number to remember \u2014 it changes both the splitter/cabinet architecture and the backbone cable type, not just the port count."},
     {id:uid(),title:'Part H — Indoor Environment',imgs:[],notes:
-"## Ventilation & mechanical\n- Ventilation rates, condensate drainage and fresh-air provision follow DBC Part H and Dubai Municipality requirements.\n- FCU condensate drain lines must be trapped and routed with fall — untrapped condensate lines are a classic snag causing ceiling stains that get mistaken for leaks.\n!! Indoor environment covers air quality, thermal comfort and ventilation inside the completed building — distinct from the incoming utility connections covered in Part G."},
-    {id:uid(),title:'Part J — Security',imgs:[],notes:placeholder('DBC Part J (Security)','summarizes and cross-references SIRA requirements — CCTV, access control and related security systems.')},
+"## H.1\u2013H.3 \u2014 Performance Statements & Core Objectives\n- Fixed MEP systems (mechanical, electrical, plumbing) must be energy-efficient, have effective controls, maintain optimal operational efficiency and support occupant health/comfort.\n- Water supply objective: a reliable supply of safe, hygienic water, paired with sanitary fittings selected to minimise overall consumption.\n- Drainage objective: soil, waste and stormwater flows must be collected and conveyed away from the building safely and efficiently.\n- Acoustic objective: occupants must be protected from undue noise from adjacent spaces, adjoining occupancies and the external ambient environment.\n- Lighting objective: adequate artificial lighting for visual comfort and safe movement wherever natural daylight is insufficient.\n- Digital services: infrastructure must enable modern digital services with seamless interoperability across multi-vendor systems.\n!! Part H is organised around outcomes (performance statements) first, then the prescriptive detail in H.4 onward — the same performance-statement structure used across the DBC (see Part A \u00a7A.6).\n\n## H.4 \u2014 HVAC Systems & Occupant Thermal Comfort\n- IAQ & ventilation: mechanical systems must continuously supply conditioned outdoor air, filtering/treating both outdoor and recirculated air to remove particulates and contaminants.\n- Demand-Controlled Ventilation (DCV): densely occupied spaces (auditoriums, meeting rooms, classrooms, event halls) require CO\u2082 sensors that dynamically adjust fresh-air supply to real-time occupant density.\n- The building envelope is the primary thermal barrier \u2014 resisting conductive heat gain, air infiltration, moisture transfer and external noise (cross-references Part E Building Envelope).\n- Cooling load: HVAC must maintain specified indoor temperature/RH setpoints under peak Dubai desert design conditions.\n- VAV systems and intelligent airflow controls are promoted to cut cooling energy during part-load operation.\n- High-exhaust-volume systems require Energy Recovery Ventilation (ERV) or Heat Recovery Ventilation (HRV) to reclaim cooling energy from exhaust air and pre-cool incoming outdoor air.\n- Refrigerants (chillers, DX units, VRF systems, split units) must be zero-ODP and low-GWP, compliant with international environmental protection standards.\n!! DCV via CO\u2082 sensors is specifically required for DENSELY occupied spaces \u2014 don't assume every room needs it; check occupancy density/type first.\n\n## H.5 \u2014 Potable Water Supply Systems\n- Potable water storage tanks and interior distribution must strictly conform to DEWA regulations.\n- Storage tanks: non-toxic, non-corrosive construction, designed against stagnation and bacterial growth (e.g. Legionella) via continuous temperature monitoring and regular flushing protocols.\n- Backflow prevention: Reduced Pressure Zone (RPZ) backflow preventers and air gaps required at utility boundary connections and high-risk equipment feeds, to prevent cross-contamination of the public supply.\n- Water conservation: high-efficiency, low-flow sanitary fittings (lavatory faucets, kitchen sinks, showerheads) with aerators, meeting maximum allowable discharge rates.\n- Water closets must be dual-flush.\n!! RPZ backflow preventers are specifically for utility boundary connections and high-risk equipment feeds \u2014 not a blanket requirement on every fixture.\n\n## H.6 \u2014 Sanitary Drainage & Wastewater Systems\n- Gravity drainage: soil/waste pipework conveys flows by gravity to municipal sewers or approved onsite treatment.\n- Every fixture needs a water trap seal connected to a dedicated vent stack network, to stop sewer gases/odours entering occupied spaces.\n- Inspection chambers are mandatory at ground level at key junction points, for maintenance access and blockage clearing.\n- Grease traps/interceptors are mandatory for commercial kitchens, restaurants, bakeries and food-prep facilities before discharge to the public sewer.\n- Stormwater/rainwater systems must be kept physically SEPARATE from sanitary soil/waste networks \u2014 never combined.\n- Greywater recycling (reclaiming lavatory/shower wastewater) is encouraged for non-potable uses such as WC flushing and landscape irrigation.\n!! System separation (storm vs. sanitary) is a hard rule, not a preference \u2014 cross-connecting the two is a common and serious site defect.\n\n## H.7 \u2014 Artificial Lighting & Controls\n- Task illuminance: minimum lux levels are set per room type for adequate task visibility and safe movement.\n- Lighting Power Density (LPD): maximum W/m\u00b2 caps apply per space classification, to limit electrical load and heat gain.\n- Occupancy/vacancy sensors are mandatory in intermittently-occupied spaces \u2014 restrooms, storage rooms, corridors, conference rooms.\n- Daylight harvesting: perimeter zones with exterior window daylight need automatic daylight dimming or daylight-responsive switching.\n- Fluorescent fixtures must use high-efficiency electronic ballasts \u2014 controls starting voltage, eliminates stroboscopic flicker, improves efficiency.\n!! LPD caps and lux minimums are both mandatory \u2014 a design that hits the lux target by simply adding more fixtures can still fail the W/m\u00b2 ceiling.\n\n## H.8\u2013H.9 \u2014 Commissioning & Fire Safety Integration\n- Testing, Adjusting & Balancing (TAB): comprehensive pre-functional testing and TAB required for ALL air and hydronic distribution systems before occupancy.\n- Performance verification: full functional performance testing of HVAC, electrical, plumbing, lighting and automation/control systems, confirming installed equipment matches design intent.\n- Fire integration: mechanical ventilation/air handling must integrate with the fire alarm system \u2014 smoke management, stairwell pressurisation, and automatic closure of fire/smoke dampers on alarm activation.\n!! Commissioning (H.8) and fire-system integration (H.9) are both PRE-occupancy requirements \u2014 neither is something to defer to post-handover snagging.\n\n## H.10 \u2014 Acoustics & Noise Isolation\n- Sound insulation: exterior fa\u00e7ades, floor slabs and inter-tenancy partitions must meet baseline Airborne Sound Insulation (R'w / STC) and Impact Sound Pressure Level (L'nT,w / IIC) standards.\n- Noise mitigation shields occupied spaces from outdoor traffic/aircraft noise, and restricts transmission between adjacent tenancies and residential sleeping quarters.\n- Vibration isolation: heavy mechanical plant (chillers, pumps, AHUs, exhaust fans) must sit on resilient vibration isolators, inertia bases and flexible duct/pipe connectors.\n- Acoustic attenuation: in-duct silencers/sound attenuators required within HVAC ductwork to control background mechanical noise in occupied spaces.\n!! Vibration isolation on plant equipment is an acoustics requirement, not just a maintenance nicety \u2014 rigid-mounted chillers/pumps transmit structure-borne noise throughout the building regardless of duct silencers.\n\n## H.11 \u2014 Digital Services & Smart ICT Infrastructure\n| Topology | Typical use |\n| Star | Primary ICT distribution \u2014 floor telecom rooms to workstations/wireless access points |\n| Ring | Backbone distribution in large facilities \u2014 loop redundancy, fault tolerance at controllers/gateways |\n| Bus | Field-device/sensor-controller level (e.g. fieldbus systems per ISO/IEC 61158) |\n| Wireless mesh | IoT sensor arrays, ad-hoc networks, smart building backbone \u2014 multi-hop routing resilience |\n- Interoperability: the ability of equipment/software from different manufacturers to exchange data openly within an integrated Building Management System (BMS).\n- BACnet: standardised open protocol for Building Automation Systems (BAS) controlling HVAC, lighting and primary plant.\n- MQTT: lightweight open IoT messaging protocol for real-time telemetry, sensor data and smart device connectivity.\n!! BACnet and MQTT solve different problems \u2014 BACnet is the BAS/plant-control backbone, MQTT is the lightweight IoT/sensor messaging layer. A digital-buildings design typically uses both, not one instead of the other."},
+    {id:uid(),title:'Part J — Security',imgs:[],notes:
+"## Legal Framework\n- Part J security design is enforced by the Security Industry Regulatory Agency (SIRA) under Law No. 12 of 2016 and By-Law Regulation 1-2018 (the Preventative Systems Manual).\n- SIRA guidelines govern security design for Part J, sitting alongside the DBC and UAE FLSC as the other primary compliance references for building design in Dubai.\n\n## Video Surveillance Systems (VSS) — Image Resolution Criteria\n| Criterion | Min. target size (% of display) | Purpose |\n| Detection (D) | 10% | Observe overall movement/activity in the scene |\n| Recognition (R) | 50% | Follow a previously identified individual |\n| Identification (I) | 120% | Facial identification of an unidentified target |\n!! D/R/I are three distinct performance tiers, not interchangeable — a camera configured only for Detection-level resolution cannot be relied on later for facial Identification. Match the tier to what the camera is actually meant to achieve.\n\n## Automated Surveillance Integration\n- City Ring: a monitored system that verifies and controls Automatic Number Plate Recognition (ANPR) across vehicle access points.\n- VideoGuard: SIRA's central monitoring platform, ensuring continuous functionality and operational health of a property's VSS deployment.\n\n## Physical & Access Controls\n- Electronic Access Control Systems (EACS).\n- Hostile Vehicle Mitigation (HVM) barriers.\n- Intrusion Detection Systems (IDS).\n- Dedicated Security Control Rooms.\n!! Which of these systems are mandatory scales with the building's occupancy classification — there is no single flat requirement that applies to every building type. Always check the specific classification before assuming a system is (or isn't) required.\n\nUse ✎ Edit to add further Part J detail (e.g. specific EACS/HVM/IDS thresholds by occupancy class) as more of the source becomes available."},
     {id:uid(),title:'Part K — Villas',imgs:[],notes:
-"## Scope\n- Part K sets villa- and townhouse-specific requirements, read together with the general provisions in Parts A–J.\n## Villa-level fire essentials (cross-referenced to UAE FLSC)\n- Smoke detectors in bedrooms, corridors and living areas connected to a home alarm panel.\n- Kitchen: heat detector (not smoke) to avoid nuisance alarms.\n- Fire-rated door and self-closer where garage connects to dwelling.\n- LPG cylinders: outdoor ventilated enclosure, piping per DCD requirements.\n!! Any deviation on fire systems needs DCD approval — municipality approval alone does not cover fire.\n\nUse ✎ Edit to add further Part K content (setbacks, plot coverage, height limits, parking, etc.) as you go through the PDF."}
+"## K.1–K.4 — Scope & Performance Objectives\n- Part K governs private residential single-family dwellings, villas and townhouses (including villa communities) in Dubai — read together with the general provisions in Parts A–J.\n- Performance objectives span structural integrity, environmental integration, thermal performance, water conservation, indoor environmental quality, fire safety and utility integration.\n!! Part K does not replace Parts A–J — it adds villa-specific rules on top of them. Where Part K is silent on a topic, the general Parts still apply.\n\n## K.5 — Architectural & Site Design\n- Plot & site layout: designs must conform to the Affection Plan (site plan) for plot boundaries, setbacks, total building height and land use.\n- Daylighting & windows: habitable rooms (bedrooms, living rooms, kitchens) need net glazing window area of at least 10% of room floor area, OR daylight modelling showing a minimum of 150 lux.\n- Stairs & circulation: specific geometric limits apply to straight, curved, spiral and winder stairs — step dimensions, handrail placements and anti-slip tread finishes are all regulated.\n- Parking & garages: minimum dimensions set for single/double garages and driveways. Where a villa provides more than two parking bays, standard manoeuvring/parking dimensions apply (as for non-villa buildings).\n- Waste management: provisions for Eurobins, waste storage rooms and waste-area fire safety requirements.\n- Prohibited materials: direct ban on asbestos-containing materials; strict limits on lead/heavy metals in paints and coatings.\n!! The 10% glazing / 150 lux daylight rule is an either/or test — meeting one is sufficient, you don't need both.\n\n## K.7 — Building Envelope & Energy Efficiency\n- Thermal performance: overall U-value limits apply to external walls, roofs and glazed assemblies; roofs also carry a Solar Reflectance Index (SRI) requirement to reduce urban heat island effect.\n- Air leakage & vapour control: air barrier continuity and vapour resistance layers are required to prevent condensation and moisture damage in Dubai's hot, humid climate.\n- Glazing & balconies: impact-resistant safety glass required wherever occupants might collide with glazing or fall; protective guards/balustrades required for balconies and open roofs.\n- Solar PV systems: rooftop or façade-integrated photovoltaic panels must comply with Civil Defence fire codes and structural integrity standards.\n!! Vapour control is not optional trim in this climate — skipping the vapour resistance layer is a common cause of hidden condensation damage inside villa wall/roof assemblies.\n\n## K.8 — Structural Design & Geotechnics\n| Load type | Requirement |\n| Wind load | Minimum design wind pressure of 1 kN/m\u00b2 |\n| Seismic load | Designed under Risk Category II per ASCE 7-16 |\n- Structures engineered for combined dead, live, thermal, wind and seismic loads together — not each in isolation.\n- Geotechnical & foundations: a Geotechnical Interpretive Report (GIR) and soil investigation are mandatory before foundation design.\n- Foundation rules cover shallow foundations, deep/piled foundations, dewatering, and accepted ground improvement techniques (dynamic compaction, vibro-compaction, soil mixing, grouting).\n!! No GIR, no foundation design — this sequencing is mandatory, not just good practice.\n\n## K.9 — Utilities, Electrical & Telecom Services\n- Electrical safety & compliance: strict compliance with DEWA regulations and BS EN/IEC standards, with proper grounding/earthing and bonding throughout.\n- Double-pole switches with neon indicators are MANDATORY for water heaters, saunas, Jacuzzis and other heavy appliances.\n- Distribution boards (DBs) must remain accessible at all times — never boxed in or obstructed.\n- Water supply & metering: DEWA-approved smart meters required for consumption monitoring.\n- Telecommunications: standardised fibre-optic infrastructure, communication cabinets (e.g. 12U cabinets for small/medium villas), pull boxes and a uniform cable labelling scheme for future-proofing.\n!! The double-pole + neon indicator rule for water heaters/saunas/Jacuzzis is a specific, commonly-missed site item — a single-pole switch here is a compliance fail even if the wiring itself is otherwise correct.\n\n## K.10–K.11 — Indoor Environment, MEP & Life Safety\n- HVAC & IAQ: mandatory energy-efficient cooling systems, proper ventilation rates, and formal commissioning of HVAC equipment before handover.\n- Plumbing & drainage: pipe sizing based on peak fixture demand; floor drains required in all wet areas.\n- Soakaways: permitted for SURFACE WATER drainage only (not foul/grey water), and the soakaway base must sit at least 1 m above the winter water table.\n- Fire & life safety: villas/townhouses with ground floor gross area >1,500 m\u00b2 OR basement gross area >1,500 m\u00b2 require full sprinkler protection and hose reels.\n- Mandatory connection to Dubai Civil Defence control centres via the Hassantuk for Homes smart monitoring system.\n- Acoustic insulation: building envelopes, party walls and floor assemblies must meet sound insulation standards (per Approved Document E) to limit noise transmission between dwellings and sleeping areas.\n!! The 1,500 m\u00b2 sprinkler trigger applies separately to ground floor AND basement — a large basement alone can trigger full sprinkler protection even if the ground floor footprint is smaller."},
+    buildAcronymSection()
   ];
 }
 function seedQuestions(){
  function q(sec,txt,opts,c,ex){return{id:uid(),sec:sec,q:txt,opts:opts,c:c,ex:ex};}
- var A='Part A — General',B='Part C — Accessibility',D='Part F — Structure',E='Part G — Incoming Utilities',F='Part K — Villas',H='Part H — Indoor Environment',PB='Part B — Architecture',PD='Part D — Vertical Transportation';
+ var A='Part A — General',B='Part C — Accessibility',D='Part F — Structure',E='Part G — Incoming Utilities',F='Part K — Villas',H='Part H — Indoor Environment',PB='Part B — Architecture',PD='Part D — Vertical Transportation',PE='Part E — Building Envelope',J='Part J — Security';
  return [
  q(A,'Which authority administers the Dubai Building Code?',['DEWA','Dubai Municipality','Dubai Civil Defense','RTA'],1,'The DBC is issued and administered by Dubai Municipality.'),
  q(A,'When the DBC and a referenced code give different requirements, which applies?',['Always the DBC','Always the referenced code','The most restrictive / highest performance requirement','Whichever the contractor prefers'],2,'Conflicts between DBC and reference codes are resolved by the most restrictive requirement (A.4.3).'),
@@ -337,26 +447,82 @@ function seedQuestions(){
  q(A,'International codes referenced by the DBC are used in:',['The 2016 edition always','Their latest edition unless the DBC pins an edition','Any edition the consultant prefers','The first edition only'],1,'Latest edition applies except where the DBC mandates a specific one, e.g. ASCE/SEI 7-2016 (A.4.2).'),
  q(A,'"Safe by design" in the first edition of the DBC is:',['Mandatory','Not mandated but likely enforced in future revisions','Only for villas','A DEWA requirement'],1,'A.4.4: not mandated in the first edition; consultants should familiarise via CDM Regulations.'),
  q(A,'DBC planning regulations in Part B are followed:',['Always','Only where plot-specific development regulations are unavailable','Only for villas','Never'],1,'Plot-specific DCR from developers/planning authorities takes precedence (A.4.1).'),
- q(B,'Minimum clear width for a door to a habitable room in a dwelling is typically:',['600 mm','700 mm','800 mm','1000 mm'],2,'800 mm clear opening is the typical minimum for habitable room doors.'),
- q(B,'Minimum guarding (balustrade) height at a villa balcony is:',['900 mm','1000 mm','1100 mm','1200 mm'],2,'External balconies require minimum 1100 mm guarding, measured from finished floor level.'),
- q(B,'Openings in guarding must not allow passage of a sphere of diameter:',['50 mm','100 mm','150 mm','200 mm'],1,'The 100 mm sphere rule prevents children passing through or becoming trapped.'),
- q(B,'For a private stair within a dwelling, the maximum riser is typically:',['150 mm','170 mm','190 mm','220 mm'],2,'Private stairs: max riser 190 mm with min going 250 mm.'),
- q(B,'Handrail height above the stair pitch line should be within:',['700–800 mm','800–900 mm','900–1000 mm','1100–1200 mm'],2,'Handrails are fixed 900–1000 mm above the pitch line / landing floor.'),
- q(B,'Guarding height must be verified from:',['Structural slab level','Finished floor level','Top of skirting','Underside of ceiling'],1,'Measure from FFL after floor finishes — tiling reduces effective guarding height.'),
+ q(A,'Under the DBC, which of these is a healthcare-specific reference that continues to apply alongside the DBC?',['DEWA Regulations','DHA regulations and guidelines','TRA regulations','SIRA regulations'],1,'DHA regulations and Federal healthcare rules govern the design of all healthcare facilities (A.4.1).'),
+ q(A,'The DTCM hotel classification criteria relate to:',['Structural design of hotels','Achieving star ratings for hotels, resorts and guest houses','Fire safety in hotels only','Parking ratios for hotels'],1,'DTCM sets requirements for star ratings; meeting the DBC minimum does not guarantee a DTCM rating (A.4.1).'),
+ q(A,'Which UAE authority licenses education facilities without providing separate DBC design requirements?',['DEWA','KHDA and the Ministry of Education','DCAA','RTA'],1,'KHDA and the Ministry of Education license schools; education facilities are approved against the DBC itself (A.4.1).'),
+ q(A,'DCAA (Dubai Civil Aviation Authority) restrictions on building height apply to:',['All buildings in Dubai','Buildings located within aviation easement areas','Only villas','Only buildings over 90 m regardless of location'],1,'DCAA regulates maximum heights for plots within flight-path/aviation easement areas (A.5.2.4).'),
+ q(A,'Which of the following is generally EXCLUDED from the DBC (regulated separately by other Authorities)?',['Villa additions','Retail shop fit-outs','Road and rail infrastructure','Hotel apartments'],2,'Infrastructure such as road/rail bridges, tunnels and buried utilities sits outside DBC scope (A.5.1).'),
  q(D,'Concrete durability design in Dubai foundations must primarily address:',['Freeze–thaw cycles','Sulphate and chloride attack from soil/groundwater','Volcanic activity','Timber decay'],1,'Hot saline, sulphate-bearing ground drives durability requirements (SRC/GGBS mixes, coatings).'),
  q(D,'Typical maximum concrete temperature at placement in UAE hot-weather specifications is:',['25°C','32°C','40°C','45°C'],1,'32°C at placement is the common specification limit — plan chilled water/ice with the plant.'),
  q(D,'Minimum recommended moist curing period for structural concrete on site is:',['1 day','3 days','7 days','21 days'],2,'Retain moisture for at least 7 days; more critical in UAE summer.'),
  q(D,'Part F of the DBC mandates which edition of ASCE/SEI 7?',['2010','2016','2022','No edition mandated'],1,'A.4.2 cites Part F mandating ASCE/SEI 7-2016 as an example of a pinned edition.'),
+ q(D,'The primary structural objective in Part F is to safely transmit which combined loads to the ground?',['Dead loads only','Dead, imposed, wind, thermal and seismic loads combined','Wind loads only','Seismic loads only, per ASCE 7-16'],1,'F.1\u2013F.4: structures must sustain and transmit COMBINED dead, imposed, wind, thermal and seismic loads for the design life without distress.'),
+ q(D,'A continuous load path under F.5 must run from roof level through gravity and lateral force-resisting systems down to:',['The ground floor slab only','The foundation','The nearest shear wall','The roof diaphragm'],1,'F.5: load path continuity is required from roof level through shear walls/core walls/moment frames/diaphragms all the way to the foundation.'),
+ q(D,'\u201cKey element\u201d design criteria under F.5.5 apply to:',['Every column in the building equally','Columns/walls whose failure could compromise a disproportionately large structural zone','Only perimeter cladding elements','Only roof-level members'],1,'F.5.5: key element criteria target elements whose individual failure risks disproportionate/progressive collapse of a larger zone.'),
+ q(D,'The Dubai Sustainable Concrete Baseline (DSCB) Annex (F.11) mandates:',['100% Portland cement for maximum strength','Partial replacement of Portland cement with SCMs such as GGBS, PFA or Silica Fume','Elimination of all cement replacement materials','Use of asbestos-based additives for durability'],1,'F.11: DSCB mandates partial SCM replacement (GGBS/PFA/Silica Fume) to lower carbon footprint and improve chemical durability.'),
+ q(D,'Structural steelwork exposed to outdoor atmospheric conditions must be protected using:',['No protection required in Dubai\u2019s dry climate','Hot-dip galvanizing or a protective anti-corrosion coating system','Paint only, any type','Timber cladding'],1,'F.6: AISC 360/BS EN 1993 steelwork exposed outdoors requires hot-dip galvanizing or an anti-corrosion coating system.'),
+ q(D,'Site-specific Wind Tunnel Testing is specifically required for structures that are:',['Any building over one storey','Tall, slender or geometrically complex','Built entirely from precast concrete','Located more than 5 km from the coast'],1,'F.7: Wind Tunnel Testing is triggered by height/slenderness/geometric complexity, not a blanket requirement for all buildings.'),
+ q(D,'Standard structures are evaluated under which seismic Risk Category per ASCE 7-16?',['Risk Category I','Risk Category II','Risk Category III always','Risk Category IV always'],1,'F.7: standard structures use Risk Category II, with higher categories reserved for critical facilities.'),
+ q(D,'Vertical deflection limits for beams/slabs/cantilevers under service loads are typically expressed as:',['A fixed 25 mm limit regardless of span','Span-to-deflection ratios such as L/360 or L/480, depending on attached non-structural elements','A percentage of the member\u2019s self-weight','No limit is specified in the DBC'],1,'F.8: deflection is limited by span-to-deflection ratio (L/360 or L/480), varying with what is attached below (partitions, glazing).'),
+ q(D,'Crack width control for RC elements is specifically emphasised in which environments?',['Fully enclosed, air-conditioned interior spaces only','Humid/coastal outdoor or underground environments','Any space with carpet flooring','Only in seismic Risk Category IV facilities'],1,'F.8: crack width limits protect durability and prevent rebar corrosion specifically in humid/coastal outdoor or underground conditions.'),
+ q(D,'A Geotechnical Interpretive Report (GIR) under F.9 must evaluate all of the following EXCEPT:',['Soil stratification and allowable bearing capacity','Soil salinity and potential liquefaction under seismic events','Seasonal groundwater levels','The building\u2019s architectural fa\u00e7ade finish'],3,'F.9: the GIR covers soil stratification, bearing capacity, salinity, liquefaction potential and groundwater levels \u2014 not architectural finishes.'),
+ q(D,'Ground improvement techniques such as dynamic compaction or vibro-flotation require:',['No further testing once applied','Post-treatment verification testing','Only a visual site inspection','Approval from DEWA only'],1,'F.9: ground improvement techniques require mandatory post-treatment verification testing to confirm the target ground properties were achieved.'),
+ q(D,'A precast stair flight connecting to a steel beam typically uses:',['Dowel ties and screed toppings only','Welded shear stud ties and U-bar links','Rebar dowels with nib support configurations','No mechanical connection, friction fit only'],1,'F.12 Annex: precast-flight-to-steel-beam connections use welded shear stud ties and U-bar links, distinct from the precast-to-precast or precast-to-in-situ details.'),
+ q(D,'A precast stair flight connecting to an in-situ landing typically uses:',['Welded shear stud ties','Dowel ties with grouted clearance holes and screed toppings','Rebar dowels with nib support configurations','Bolted steel angle brackets'],2,'F.12 Annex: precast-flight-to-in-situ-landing connections use rebar dowels with nib support configurations.'),
  q(E,'Electrical installations under the DBC must comply with:',['NEC (US)','DEWA Regulations for Electrical Installations','BS 7671 only','Contractor\'s method statement'],1,'DBC incorporates/cross-references DEWA Regulations for electrical work.'),
  q(E,'The standard DEWA low-voltage 3-phase supply is:',['220/110 V, 60 Hz','380/220 V, 60 Hz','400/230 V, 50 Hz','415/240 V, 50 Hz'],2,'Dubai LV system is 400/230 V, 3-phase, 50 Hz.'),
  q(E,'Cable current ratings on Dubai sites are derated for an ambient temperature of:',['30°C','35°C','45°C','50°C'],3,'50°C ambient is the standard design assumption per DEWA practice.'),
  q(E,'RCD protection at 30 mA is required for:',['Lighting circuits only','Socket-outlet circuits and wet areas','Fixed AC units only','Earthing conductors'],1,'30 mA RCDs protect socket circuits and locations with water risk.'),
  q(E,'Telecommunications design in the DBC follows federal regulations of:',['SIRA','TRA','RTA','KHDA'],1,'TRA federal telecom regulations are documented in G.11.'),
+ q(E,'Supplementary equipotential bonding is specifically mandatory in:',['All circuits without exception','High-risk wet areas such as bathrooms, kitchens and plant rooms','Only the main switchboard room','Only outdoor lighting circuits'],1,'G.4: supplementary bonding is required in high-risk wet areas, separate from the main earthing terminal (MET) requirement.'),
+ q(E,'EV charging points must feature dedicated RCD protection, proper earthing, and integration with:',['The fire alarm panel','The building\u2019s load management system, to prevent overload during peak periods','The BMS lighting controls only','The district cooling ETS'],1,'G.5: EV chargers integrate with the load management system specifically to prevent overload at peak demand.'),
+ q(E,'Rooftop or fa\u00e7ade-integrated solar PV systems in Dubai must conform to which DEWA programme?',['Al Sa\u2019fat','Shams Dubai','Tarshid','Hassantuk'],1,'G.6: onsite solar PV must conform to DEWA\u2019s Shams Dubai net-metering grid interconnection standards.'),
+ q(E,'PV inverters must include automatic anti-islanding protection primarily to:',['Increase energy yield','Disconnect PV generation safely during a utility grid outage','Reduce inverter cost','Improve battery charging speed'],1,'G.6: anti-islanding protection prevents PV systems from continuing to energise a de-energised grid line during an outage, protecting utility workers.'),
+ q(E,'A building requiring MV supply must provide a dedicated DEWA transformer/substation room with:',['Access only from within the building lobby','Direct exterior vehicular access','No ventilation requirement','Shared access with the parking ramp only'],1,'G.7: substation rooms need direct exterior vehicular access so DEWA can deliver/replace equipment without routing through the building.'),
+ q(E,'Transformer rooms under Part G require which of the following?',['Oil containment bunds and fire-rated wall/door assemblies','Carpet flooring for acoustic comfort','Direct connection to the potable water break tank','No mechanical ventilation, natural draft only'],0,'G.7: transformer rooms require adequate ventilation, oil containment bunds and fire-rated construction.'),
+ q(E,'Centralised LPG systems serving commercial kitchens must include which mandatory safety features?',['Gas detection, automatic emergency shut-off (solenoid) valves and explosion-proof fittings','A grease interceptor only','A backflow preventer only','A BTU thermal energy meter'],0,'G.8: spaces with gas appliances require gas detection, automatic solenoid shut-off valves and explosion-proof fittings.'),
+ q(E,'Bulk LPG storage tanks or cylinder manifolds must be located:',['In a basement plant room for security','In open, well-ventilated outdoor areas with safety setbacks from openings/ignition sources','Adjacent to the main switchboard','Inside the MTR'],1,'G.8: LPG storage requires open, ventilated outdoor locations set back from building openings and ignition sources.'),
+ q(E,'Every incoming water line requires which type of meter?',['A BTU thermal energy meter','A DEWA-approved smart master water meter','A grease interceptor flow gauge','No metering is required on incoming lines'],1,'G.9: incoming water lines require a DEWA-approved smart master meter to record bulk consumption, with sub-metering per tenancy.'),
+ q(E,'Direct connection of incoming water to pump suction lines is:',['Required for pressure boosting','Prohibited \u2014 water must discharge into a compliant break tank with air gaps and backflow preventers first','Permitted only in villas','Permitted with DEWA written approval only'],1,'G.9: direct-to-suction connection is prohibited; incoming water must pass through a break tank with air gaps/backflow preventers.'),
+ q(E,'Buildings served by district cooling must allocate dedicated space for:',['A grease interceptor room','An Energy Transfer Station (ETS) with heat exchangers and primary/secondary pumps','A Main Telecom Room (MTR)','An RMU switchroom only'],1,'G.10: district-cooling-served buildings need dedicated ETS space containing heat exchangers, pumps and control valves.'),
+ q(E,'Thermal energy meters on primary district cooling lines measure consumption in:',['Litres per second','kWh / Ton-hours','Bar pressure differential','Decibels'],1,'G.10: BTU/thermal energy meters measure energy consumption transferred from the district cooling network in kWh or Ton-hours.'),
+ q(E,'A multistorey commercial building\u2019s Main Telecom Room (MTR) must support simultaneous connectivity for:',['Only the building\u2019s chosen single ISP','Both licensed operators, du and Etisalat, via shared ODFs','SIRA-approved security vendors only','DEWA smart metering only'],1,'G.11: telecom infrastructure must provide open access for multiple licensed operators (du and Etisalat) via shared Optical Distribution Frames.'),
+ q(E,'For an FTTH/FTTT building with more than 256 units, the fibre backbone cable type specified is:',['Simple 4-core drop cable only','Tight-buffer/micro-module LSZH indoor multicore backbone cable','Standard PVC-sheathed copper backbone','Coaxial RG6 backbone'],1,'G.11: buildings >256 units use tight-buffer/micro-module LSZH multicore fibre backbone with mini ODF splice cabinets and 2\u00d732 port splitters per operator.'),
  q(H,'FCU condensate drain lines must be:',['Run without slope','Trapped and laid to fall','Connected directly to soil stack without trap','Left open above ceiling'],1,'Untrapped or flat condensate lines cause ceiling staining that mimics leaks.'),
+ q(H,'Demand-Controlled Ventilation (DCV) using CO\u2082 sensors is specifically required for:',['Every room in the building regardless of use','Densely occupied spaces such as auditoriums, meeting rooms and classrooms','Only residential bedrooms','Only mechanical plant rooms'],1,'H.4: DCV/CO\u2082 sensors dynamically adjust fresh-air supply in densely occupied spaces to real-time occupant density.'),
+ q(H,'High-exhaust-volume ventilation systems must incorporate which energy-saving equipment?',['A destination control system','ERV or HRV units to reclaim cooling energy from exhaust air','A grease interceptor','A backflow preventer'],1,'H.4: Energy Recovery Ventilation (ERV) or Heat Recovery Ventilation (HRV) reclaim cooling energy from exhaust air and pre-cool incoming outdoor air.'),
+ q(H,'Refrigerants used in chillers, DX units, VRF systems and split units must be:',['High-GWP only, for efficiency','Zero-ODP and low-GWP','Any refrigerant approved by the manufacturer','CFC-based for cost reasons'],1,'H.4: refrigerants must be zero-ODP (Ozone Depletion Potential) and low-GWP (Global Warming Potential), per international environmental standards.'),
+ q(H,'Potable water storage tanks and interior distribution networks must strictly conform to:',['ASCE 7-16','DEWA regulations','SIRA regulations','BACnet standards'],1,'H.5: potable water storage/distribution must strictly conform to DEWA regulations.'),
+ q(H,'Backflow prevention at utility boundary connections and high-risk equipment feeds requires:',['A simple check valve only','Reduced Pressure Zone (RPZ) backflow preventers and air gaps','A grease interceptor','A dual-flush WC'],1,'H.5: RPZ backflow preventers and air gaps prevent cross-contamination of the public water supply at boundary connections and high-risk feeds.'),
+ q(H,'Every plumbing fixture must be connected to a dedicated vent stack network primarily to:',['Increase water pressure','Prevent sewer gases and odours entering occupied spaces','Reduce pipe material cost','Meet DEWA metering requirements'],1,'H.6: trap seals plus dedicated stack venting stop sewer gases/odours from entering occupied spaces.'),
+ q(H,'Grease traps/interceptors are mandatory for which of these facilities?',['Residential bathrooms','Commercial kitchens, restaurants, bakeries and food-prep facilities','Office pantries only','Car parking buildings'],1,'H.6: commercial kitchens and food-prep facilities must discharge grease-laden wastewater through properly sized grease interceptors.'),
+ q(H,'Rainwater/stormwater collection systems must be:',['Combined with sanitary soil/waste networks for efficiency','Kept physically separate from sanitary soil and waste networks','Optional depending on building type','Routed through the grease interceptor'],1,'H.6: system separation is mandatory \u2014 storm and sanitary networks must never be combined.'),
+ q(H,'Which control is mandatory in intermittently-occupied spaces such as restrooms, storage rooms and corridors?',['Daylight dimming only','Automatic occupancy or vacancy sensors','Manual switches only','DCV CO\u2082 sensors'],1,'H.7: intermittently occupied spaces require automatic occupancy/vacancy sensors for lighting control.'),
+ q(H,'Perimeter zones with exterior window daylight must feature:',['Manual dimmer switches only','Automatic daylight dimming or daylight-responsive switching','No lighting controls, natural light is sufficient','Fixed-output LED fixtures only'],1,'H.7: daylight harvesting requires automatic dimming or daylight-responsive switching in daylit perimeter zones.'),
+ q(H,'Before building occupancy, all air and hydronic distribution systems require:',['A final DEWA inspection only','Comprehensive pre-functional testing and Testing, Adjusting & Balancing (TAB)','Grease interceptor sizing','A fire risk assessment only'],1,'H.8: TAB execution is mandatory for all air and hydronic distribution systems prior to occupancy.'),
+ q(H,'On fire alarm activation, mechanical/air handling equipment must automatically:',['Increase fresh air supply to maximum','Close fire and smoke dampers and assist stairwell pressurisation/smoke management','Shut down all HVAC permanently','Switch to DCV mode'],1,'H.9: mechanical systems integrate with the fire alarm for smoke management, stairwell pressurisation and automatic fire/smoke damper closure.'),
+ q(H,'Heavy mechanical plant such as chillers, pumps and AHUs must be installed on:',['Rigid concrete plinths only, for stability','Resilient vibration isolators, inertia bases and flexible duct/pipe connectors','Standard steel brackets','Timber blocking'],1,'H.10: vibration isolation prevents structure-borne noise transmission from heavy mechanical plant.'),
+ q(H,'BACnet and MQTT serve different roles in a digital building \u2014 which statement is correct?',['They are interchangeable and either can replace the other','BACnet is the BAS/plant-control backbone; MQTT is the lightweight IoT/sensor messaging layer','MQTT controls HVAC and lighting directly; BACnet is only for sensors','Both are proprietary, single-vendor protocols'],1,'H.11: BACnet standardises Building Automation System control of HVAC/lighting/plant; MQTT is a lightweight protocol for IoT telemetry and sensor data.'),
  q(F,'Which detector type is recommended in villa kitchens?',['Ionisation smoke detector','Optical smoke detector','Heat detector','Beam detector'],2,'Heat detectors avoid nuisance alarms from cooking fumes.'),
  q(F,'A door between an attached garage and the dwelling must be:',['Standard hollow-core','Fire-rated with self-closer','Sliding glass','Louvred'],1,'Garage-to-dwelling doors are fire-rated and self-closing.'),
  q(F,'LPG cylinders serving a villa kitchen should be located:',['Under the kitchen sink','In the bedroom closet','In an outdoor ventilated enclosure','On the roof without enclosure'],2,'DCD requires outdoor ventilated enclosures with compliant piping.'),
  q(F,'Changes to fire alarm or firefighting systems require approval from:',['Dubai Municipality only','The main contractor','Dubai Civil Defense','DEWA'],2,'Fire system deviations need DCD approval — DM approval does not cover fire.'),
+ q(F,'A habitable room in a villa can satisfy the daylighting requirement in Part K by:',['Net glazing area \u226510% of room floor area, OR daylight modelling showing \u2265150 lux','Net glazing area \u226520% of room floor area only','Mechanical ventilation alone, no glazing needed','A skylight of any size'],0,'K.5: habitable rooms need net glazing \u226510% of floor area OR daylight modelling demonstrating \u2265150 lux \u2014 either test is sufficient.'),
+ q(F,'The minimum design wind pressure for villa structural design under Part K is:',['0.5 kN/m\u00b2','1 kN/m\u00b2','1.5 kN/m\u00b2','2 kN/m\u00b2'],1,'K.8: villas are designed for a minimum wind pressure of 1 kN/m\u00b2.'),
+ q(F,'Seismic design for villas under Part K follows:',['UBC 97, Zone 2A','ASCE 7-16, Risk Category II','Eurocode 8 only','No seismic design is required for villas'],1,'K.8: villa seismic design uses ASCE 7-16 under Risk Category II.'),
+ q(F,'Before foundation design for a villa can proceed, Part K mandates:',['A structural peer review only','A Geotechnical Interpretive Report (GIR) and soil investigation','DEWA approval only','A fire risk assessment'],1,'K.8: a GIR and soil investigation are mandatory prerequisites to foundation design.'),
+ q(F,'Under Part K, double-pole switches with neon indicators are mandatory for which of these?',['Standard lighting circuits only','Water heaters, saunas, Jacuzzis and other heavy appliances','Doorbell circuits','Smoke detector circuits'],1,'K.9: heavy/wet appliances such as water heaters, saunas and Jacuzzis require double-pole switches with neon indicators.'),
+ q(F,'A villa soakaway may be used for:',['Foul drainage only','Grey water only','Surface water drainage only','Any wastewater, unrestricted'],2,'K.10\u2013K.11: soakaways are permitted for surface water drainage only, with the base kept \u22651 m above the winter water table.'),
+ q(F,'Full sprinkler protection and hose reels are required in a villa when:',['Any villa over 2 storeys','Ground floor OR basement gross area exceeds 1,500 m\u00b2','The plot area exceeds 1,000 m\u00b2','Only if requested by the owner'],1,'K.10\u2013K.11: ground floor gross area >1,500 m\u00b2 OR basement gross area >1,500 m\u00b2 triggers mandatory full sprinkler protection and hose reels.'),
+ q(F,'Villas must connect to Dubai Civil Defence control centres via which system?',['SIRA Connect','Hassantuk for Homes','DEWA Smart Grid','TRA Homelink'],1,'K.10\u2013K.11: mandatory connection to DCD control centres is via the Hassantuk for Homes smart monitoring system.'),
+ q(F,'Acoustic insulation requirements for party walls and floor assemblies between villa dwellings are set with reference to:',['ASCE 7-16','Approved Document E','BS EN 81','IEC 60228'],1,'K.10\u2013K.11: sound insulation between dwellings/sleeping areas follows standards set out per Approved Document E.'),
+ q(J,'Part J security design in Dubai is enforced by:',['Dubai Civil Defence (DCD)','The Security Industry Regulatory Agency (SIRA)','DEWA','Dubai Municipality'],1,'Part J: SIRA enforces security design under Law No. 12 of 2016 and By-Law Regulation 1-2018 (the Preventative Systems Manual).'),
+ q(J,'For VSS "Detection" (D) \u2014 observing overall movement in a scene \u2014 the minimum target size is:',['5% of display size','10% of display size','50% of display size','120% of display size'],1,'Part J: Detection requires a minimum target size of 10% of the display size.'),
+ q(J,'For VSS "Recognition" (R) \u2014 following a previously identified individual \u2014 the minimum target size is:',['10% of display size','25% of display size','50% of display size','100% of display size'],2,'Part J: Recognition requires a minimum target size of 50% of the display size.'),
+ q(J,'For VSS "Identification" (I) \u2014 facial identification of an unidentified target \u2014 the minimum target size is:',['50% of display size','80% of display size','100% of display size','120% of display size'],3,'Part J: Identification requires a minimum target size of 120% of the display size \u2014 the strictest of the three tiers.'),
+ q(J,'Which SIRA system verifies and controls Automatic Number Plate Recognition (ANPR) across vehicle access points?',['VideoGuard','City Ring','Hassantuk for Homes','EACS'],1,'Part J: City Ring is the monitored system for ANPR verification and control at vehicle access points.'),
+ q(J,'Which SIRA platform provides central monitoring for the continuous functionality and operational health of a property\u2019s VSS deployment?',['City Ring','VideoGuard','Hassantuk for Homes','DCS'],1,'Part J: VideoGuard is SIRA\u2019s central monitoring platform for VSS operational health.'),
+ q(J,'Requirements for EACS, HVM barriers, IDS and dedicated Security Control Rooms are primarily determined by:',['The plot area only','The building\u2019s occupancy classification','The main contractor\u2019s preference','DEWA connection size'],1,'Part J: physical/access control requirements scale with the building\u2019s occupancy classification, not a single flat rule.'),
  q(PB,'The maximum allowable building height is calculated as the permitted number of floors multiplied by:',['4 m per floor','5 m per floor','6 m per floor','7 m per floor'],2,'Total allowable height = number of floors × 6 m (e.g. G+10 → 11 × 6 m = 66 m).'),
  q(PB,'For a G+7 building, the minimum setback from a neighbour (ground floor and above) is:',['3 m','4.5 m','6 m','7.5 m'],2,'Table B.1: G+7 requires a 6 m setback from the neighbour.'),
  q(PB,'Guardrails for fall protection are required wherever an elevated surface is:',['300 mm or more above FFL','500 mm or more above FFL','760 mm or more above FFL','1,000 mm or more above FFL'],2,'Guardrails are mandatory for elevated surfaces ≥760 mm above finished floor level.'),
@@ -380,6 +546,14 @@ function seedQuestions(){
  q(PB,'Designated smoking areas must be located at least how far from building entrances and air intakes?',['5 m','6 m','7.5 m','10 m'],2,'B.10.4: designated smoking areas shall be at least 7.5 m away from entrances, doors, operable windows and outdoor air intakes.'),
  q(PB,'What percentage of the total planted area within a plot must use indigenous or locally-adapted species?',['15%','20%','25%','30%'],2,'B.10.5.1: at least 25% of the total planted area shall utilize indigenous or adapted plant/tree species.'),
  q(PB,'People shall be able to identify their location without walking more than how far inside a building?',['20 m','30 m','40 m','50 m'],1,'B.11.2: people shall be able to identify their location without walking more than 30 m inside buildings (70 m in open spaces).'),
+ q(PB,'The gate level of a plot (elevation at the vehicular/pedestrian access point) shall be a minimum height above the road edge of:',['+150 mm','+300 mm','+450 mm','+600 mm'],1,'B.4.2.1: gate level minimum +300 mm above road edge, or a 2–5% slope from the road edge to the plot access.'),
+ q(PB,'Ground floor exit discharge points shall be separated on plan by one third or one half of the largest measurement, depending on whether the building is:',['Residential or commercial','High-rise or low-rise','Sprinklered or unsprinklered','Public or private'],2,'B.4.3.1: separation is 1/3 (sprinklered) or 1/2 (unsprinklered) of the largest diagonal/dimension measurement.'),
+ q(PB,'Roof structures (excluding stairs/elevator rooms) are limited to what percentage of the roof area, with a minimum setback from the envelope?',['30%, 1.0 m','50%, 1.5 m','70%, 2.0 m','100%, no setback'],1,'B.4.3.4: roof structures max 50% of roof area, set back at least 1.5 m from the building envelope.'),
+ q(PB,'The minimum clear width for a mall pedestrian way exceeding 3,600 m\u00b2 GA per floor, single-sided, is:',['1.8 m','3 m','6 m','9 m'],1,'Table B.5: mall pedestrian ways >3,600 m\u00b2 GA/floor require 3 m single-sided / 6 m double-sided.'),
+ q(PB,'For regular-use (daily circulation) stairs, Table B.6 recommends a riser height range of:',['100\u2013180 mm','120\u2013140 mm','150\u2013165 mm','170\u2013190 mm'],2,'B.6.4.1.6: regular-use and external stairs recommend riser 150\u2013165 mm with tread depth \u2265300 mm, distinct from the 100\u2013180 mm exit-stair range.'),
+ q(PB,'Vehicular ramps with a helical configuration are limited to a maximum slope of:',['8%','10%','12%','15%'],0,'Table B.9: straight/curved ramps max 12%; helical ramps are stricter at max 8%, reflecting the added difficulty of the turning geometry.'),
+ q(PB,'A minimum clear height of 2.5 m is required in offices, retail shops and classrooms; residential living and bedroom spaces require a minimum clear height of:',['2.3 m','2.5 m','2.7 m','3.0 m'],2,'Table B.4: residential/hotel living and bedroom spaces require 2.7 m minimum clear height, FFL to soffit.'),
+ q(PB,'Under Table B.2, the occupant load factor for a concentrated assembly space such as a ballroom is:',['0.65 m\u00b2/person (net area)','1.4 m\u00b2/person (net area)','4.6 m\u00b2/person (GA)','9.3 m\u00b2/person (GA)'],0,'Table B.2: concentrated assembly (ballrooms, multipurpose halls) = 0.65 m\u00b2/person net area, denser than "less concentrated" spaces at 1.4 m\u00b2/person.'),
  q(B,'Part C accessibility requirements apply to individual villas and townhouses:',['Yes, in all cases','No — these are addressed in Part K','Only for villas over two storeys','Only for villas with more than 4 bedrooms'],1,'C.4.1: Part C is not applicable to individual dwellings, villas or townhouses — these are covered in Part K.'),
  q(B,'The minimum width for an external accessible route is:',['1,000 mm','1,200 mm','1,500 mm','1,800 mm'],1,'Table C.1: external accessible route minimum width is 1,200 mm (1,800 mm recommended for two-way/heavy traffic).'),
  q(B,'The minimum width for an internal accessible route is:',['900 mm','1,000 mm','1,200 mm','1,500 mm'],1,'Table C.3: internal accessible route minimum width is 1,000 mm.'),
@@ -404,6 +578,8 @@ function seedQuestions(){
  q(B,'For an auditorium with 500 seats, the required number of wheelchair spaces is calculated as:',['1 per 25 seats','1 per 50 seats up to 500, then 1 per 100 thereafter','1 per 100 seats throughout','A flat 10 spaces regardless of capacity'],1,'Table C.26: one wheelchair space per 50 seats up to 500 seats, then one per 100 seats above that.'),
  q(B,'For new residential developments with more than 10 units, what minimum percentage of units (plus all common spaces) must be adaptable?',['1%','2%','5%','10%'],1,'C.10.3.2: a minimum of 2% of total units and all common spaces shall be adaptable to accessibility needs.'),
  q(B,'The minimum reflectance contrast between accessible signage text and its background is:',['30 points LRV','40 points LRV','50 points LRV','60 points LRV'],2,'C.11.2: colour contrast between text and background shall have a minimum clear reflectance contrast of 50 points LRV.'),
+ q(B,'At least one accessible elevator is required in every building with more than one floor. Which of these is NOT a listed exemption?',['A two-storey restaurant with equal amenities on both floors','A mechanical plant room not intended for occupancy','A G+1 building over 250 m\u00b2 of GA used as public retail','A plot area of less than 250 m\u00b2'],2,'C.5.9.3.1: the G+1 exemption applies only below 250 m\u00b2 GA and excludes retail, mall, healthcare or public transport use \u2014 a public retail floor over 250 m\u00b2 does not qualify.'),
+ q(B,'Accessible parking spaces for a car (angled or perpendicular) shall measure at least:',['2.5 \u00d7 5.0 m','2.5 \u00d7 5.5 m','3.0 \u00d7 5.5 m','3.35 \u00d7 5.5 m'],1,'Table C.18: accessible car bays (angled/perpendicular) are 2.5 m \u00d7 5.5 m; the larger 3.35 \u00d7 5.5 m size is reserved for accessible vans.'),
  q(PD,'For a service elevator, it is recommended that it reaches the uppermost floor of a building within:',['30 seconds','45 seconds','60 seconds','90 seconds'],2,'D.8.2.2: it is recommended that service elevators reach the uppermost floor within 60 seconds.'),
  q(PD,'The maximum number of elevators permitted within one elevator core is:',['2','4','6','8'],1,'D.7.3.1: a maximum of four elevators shall be accommodated in one elevator core.'),
  q(PD,'The maximum number of elevators that may share one lobby with a conventional control system is:',['4','6','8','10'],2,'D.7.3.1: a maximum of eight elevators shall share one elevator lobby with a conventional control system.'),
@@ -416,9 +592,223 @@ function seedQuestions(){
  q(PD,'Which handling capacity (HC5%) ceiling applies to regular office buildings outside lunch peak?',['8%','10%','12%','15%'],2,'Table D.32: regular office handling capacity ceiling is 12% (rising to 13% during lunch peak per Table D.33).'),
  q(PD,'The maximum recommended acceleration for a bed (stretcher) elevator is:',['0.6 m/s²','0.8 m/s²','1.0 m/s²','1.2 m/s²'],0,'D.9.8.2: bed elevators are capped at 0.6 m/s² acceleration and 1.0 m/s³ jerk, regardless of rated speed.'),
  q(PD,'Destination Control Systems (DCS) are generally preferred over conventional systems when:',['All elevators serve an equal number of stops','Up-peak traffic is not demanding','The building has multiple function areas/mixed uses and tenant enrolment access control','The building is a small single-tenant villa'],2,'D.9.8.3: DCS is preferred where elevators don\'t serve equal stops, up-peak traffic is demanding, there are multiple function areas, or tenants/visitors enrol for access.'),
+ q(PD,'The building shall provide a safe, sustainable, adequate and effective vertical transportation service — this performance statement (D.1) is met by following:',['D.1 only','D.2 and D.3 only','D.4 to D.9','The Annex in D.10 only'],2,'D.1: the performance statement is met by following the prescriptive/performance requirements of D.4 through D.9.'),
+ q(PD,'One suite of standards must be selected for elevator design and shall not be mixed with the other. The two suites recognised by the DBC are:',['ASME A17 and BS EN 81','IEC 60228 and BS EN 81','ASME A17 and NFPA 285','BS EN 81 and ASHRAE 90.1'],0,'D.5: VT systems follow either the ASME A17 suite OR the BS EN 81 suite — never a mix of the two on one project.'),
+ q(PD,'Elevators in new buildings must include energy-efficient lighting that shuts off after a maximum inactivity period of:',['3 minutes','5 minutes','10 minutes','15 minutes'],1,'D.6.1: elevator lighting controls must switch off after a maximum of 5 minutes of inactivity, with luminous efficacy greater than 70 lumens per circuit-Watt.'),
+ q(PD,'Escalators and moving walks must fully shut down (with soft-start on restart) after a maximum inactivity period of:',['3 minutes','5 minutes','10 minutes','15 minutes'],3,'D.6.2: escalators/moving walks reduce speed after 3 minutes of no activity and fully shut down after a maximum of 15 minutes.'),
+ q(PD,'Doors from apartments or other residential accommodation shall NOT open directly into:',['A fire stair','An elevator lobby','A service corridor','A refuse room'],1,'D.7.2.1: residential unit doors must not open directly into an elevator lobby.'),
+ q(PD,'The distance between two elevator cores arranged facing each other shall be capped at a maximum of:',['3.0 m','3.6 m','4.5 m','6.0 m'],2,'D.7.3.3: facing elevator cores are spaced at the greatest of 2.4 m minimum / 2× deepest cabin depth / 1.5× firefighting cabin depth, but never exceeding 4.5 m.'),
+ q(PD,'For a school building (assumed maximum five storeys), the DBC requires a fixed provision of:',['1 elevator, passenger use','2 elevators, for service/people of determination only','2 elevators, unrestricted passenger use','No elevator required below five storeys'],1,'D.8.17: schools are provided with 2 elevators intended for service applications and people of determination only, not general passenger circulation.'),
+ q(PD,'Section 2.9, Ch.2 of UAE FLSC requires at least one firefighting elevator in which of these building types?',['Any two-storey villa','A mall, multi-storey amusement park, or high-rise/super high-rise/high-depth building','Any building with a basement','Only buildings taller than 300 m'],1,'D.8.3.1: firefighting elevators are mandated for malls, multi-storey amusement parks and buildings classed high-rise, super high-rise or high-depth.'),
+ q(PE,'A guardrail or equivalent structural resistance is required for building envelope elements protecting a change in level greater than:',['500 mm','600 mm','760 mm','900 mm'],2,'E.4.1.4: parts of the envelope protecting a change in level greater than 760 mm need structural resistance per ASCE 4.5.1 or a guardrail per B.4.2.5.2.'),
+ q(PE,'For storey-height envelope assemblies with a span of 3,000 mm to 7,500 mm, the maximum deflection is:',['1/200','5 mm + 1/300','1/250','1/90'],1,'Table E.1: storey-height assemblies between 3,000 mm and 7,500 mm span are limited to 5 mm + 1/300.'),
+ q(PE,'The minimum hard-body safety impact energy for opaque envelope areas within 1.5 m of ground level is:',['3 J','6 J','10 J','120 J'],2,'Table E.2: hard body safety impact for areas within 1.5 m of ground/FFL is 10 J.'),
+ q(PE,'Under operational forces, envelope surfaces must sustain a uniformly distributed load or point load of:',['0.3 kN/m² or 0.5 kN','0.6 kN/m² or 1 kN','1.0 kN/m² or 1.5 kN','1.5 kN/m² or 2 kN'],1,'E.4.1.4: a uniformly distributed 0.6 kN/m² or a 1 kN vertical load, whichever is more onerous.'),
+ q(PE,'Fixings securing the building envelope shall:',['Be welded for maximum strength','Never be welded','Be welded only above 15 m height','Be welded only in seismic zones'],1,'E.4.1.7: fixings shall not be welded.'),
+ q(PE,'The maximum window-to-wall ratio (WWR) for glazed façades of a residential building (except shopfronts) is:',['30% of gross wall area','40% of gross wall area','50% of gross wall area','60% of gross wall area'],1,'E.5.2.1: residential buildings are capped at 40% WWR; all other building types at 60%.'),
+ q(PE,'Under the orientation-based glazing limits (Table E.3), which orientation has the strictest (lowest) maximum glazing percentage?',['North','East and West','South, Southeast and Southwest','Northeast and Northwest'],2,'Table E.3: South, Southeast and Southwest are capped at ≤40%, the strictest of all orientations.'),
+ q(PE,'The maximum average thermal transmittance permitted for a roof (non-glazed) is:',['0.2 W/m²K','0.3 W/m²K','0.4 W/m²K','0.57 W/m²K'],1,'Table E.4: roof thermal transmittance shall not exceed 0.3 W/m²K.'),
+ q(PE,'For ground-contact floors, the thermal transmittance requirement is achieved by installing perimeter insulation of:',['0.5 m','1 m','1.5 m','2 m'],1,'E.5.2.3.1: 1 m of perimeter insulation is used to meet the ground-floor thermal transmittance requirement.'),
+ q(PE,'For a glazed vertical surface where total glazed area exceeds 60%, the maximum shading coefficient permitted is:',['0.4','0.32','0.25','0.20'],2,'Table E.5: total glazed area >60% requires shading coefficient ≤0.25 (the strictest tier).'),
+ q(PE,'Opaque roof surfaces must achieve the required solar reflectance index (SRI) over a minimum of what percentage of the roof area?',['50%','60%','75%','90%'],2,'E.5.7/Table E.8: SRI requirements apply to a minimum of 75% of the roof area.'),
+ q(PE,'The minimum SRI value required for flat or low-sloped roofs (≤1:6 slope) is:',['29','50','65','78'],3,'Table E.8: flat and low-sloped roofs require SRI ≥78, compared to ≥29 for steep roofs and walls.'),
+ q(PE,'Maximum average lighting power density for exterior building envelope lighting is:',['1.5 W/m²','2.2 W/m²','3.0 W/m²','4.5 W/m²'],1,'E.5.8: exterior lighting power density shall not exceed 2.2 W/m² per illuminated surface (or 16.4 W/linear metre).'),
+ q(PE,'Wall-washing architectural accent lighting is limited to spilling past the building façade by no more than:',['5%','10%','15%','20%'],1,'E.5.8(b): wall washing lights shall spill no more than 10% of the lighting past the building façade.'),
+ q(PE,'A damp-proof course in a building envelope wall not subject to groundwater pressure shall be provided at a minimum height above adjoining ground of:',['100 mm','150 mm','200 mm','250 mm'],1,'E.7.2: damp-proof course shall be at least 150 mm above the level of adjoining ground.'),
+ q(PE,'Which type of external wall requires a drained air space in its cavity, or must otherwise prevent moisture reaching the inner leaf?',['Solid external walls','Solid external walls with air cavities or rainscreens','Curtain walling only','None — all wall types are treated identically'],1,'E.7.3.3(b): solid external walls with cavities or rainscreens need a drained air space or must stop precipitation reaching the inner leaf.'),
+ q(PE,'Which of these locations does NOT require flashing under E.7.3.4?',['Perimeters of exterior door and window assemblies','Built-in gutters','Interior partition walls not exposed to the exterior','Exterior wall intersections with roofs or balconies'],2,'E.7.3.4: flashing is required at door/window perimeters, wall penetrations, roof/balcony intersections and built-in gutters — not interior partitions.'),
+ q(PE,'External noise protection requirements for the building envelope are governed by:',['Part E directly, with its own acoustic tables','Part H (H.10)','Part B','Part F'],1,'E.8: the building envelope shall meet the acoustic requirements given in H.10 — Part E has no separate acoustic tables of its own.'),
+ q(PE,'Under BS EN 12600 classification (Table E.9), safety glazing for a door side panel above 900 mm FFL requires:',['Class 1','Class 2','Class 3','No classification required'],2,'Table E.9: door side panels above 900 mm FFL require Class 3.'),
+ q(PE,'Glazing below 800 mm FFL that protects a change in level greater than 760 mm must provide:',['Manifestation only','Containment','A guardrail with no glass requirement','Overhead lamination only'],1,'E.9.2: glazing below 800 mm FFL protecting a >760 mm level change shall provide containment.'),
+ q(PE,'Manifestation markings on glazing shall be located at a height above FFL of:',['500–1,000 mm','650–1,350 mm','750–1,500 mm','900–1,800 mm'],2,'E.9.3: manifestation shall be located between 750 mm and 1,500 mm above FFL.'),
+ q(PE,'Manifestation is NOT required on a glass surface when:',['The glass is wider than 2,000 mm','The glass surface does not extend more than 850 mm above FFL','The glass is located at the main entrance','The glass is tinted'],1,'E.9.3: manifestation is exempted where the glass surface does not extend more than 850 mm above FFL, among other listed exceptions.'),
+ q(PE,'Operable windows must be restrained to limit the opening to a maximum of:',['50 mm','75 mm','100 mm','150 mm'],2,'E.9.4: operable windows shall be restrained to limit the opening to 100 mm to prevent falls.'),
+ q(PE,'Sliding and operable windows shall be located at a minimum height above FFL of:',['750 mm','800 mm','900 mm','1,000 mm'],2,'E.9.4: sliding and operable windows shall be located at a height not less than 900 mm from FFL.'),
+ q(PE,'Overhead glazing (skylights) shall be:',['Toughened only','Laminated with a post-breakage containment system','Wired glass only','Any glass type, no special requirement'],1,'E.9.5: overhead glazing shall be laminated and include a post-breakage containment system.'),
+ q(PE,'Which UAE FLSC clause on guardrails/balustrades is superseded by the DBC?',['Chapter 1, Section 2.17 — superseded by B.4.2.5.2','Chapter 3, Section 5 — superseded by Part D','Chapter 9 — superseded by Part H','None — UAE FLSC guardrail rules always take precedence'],0,'E.10.1: UAE FLSC Ch.1 §2.17 guardrail/balustrade requirements are superseded by DBC B.4.2.5.2.'),
+ q(PE,'Sprinklers on balconies are:',['Always mandated by DCD regardless of materials','Not mandated by DCD provided balcony construction materials conform to UAE FLSC Ch.1','Mandated only above 23 m height','Mandated only in hotels'],1,'E.10.2: balcony sprinklers are not mandated by DCD provided the materials of construction conform to UAE FLSC Ch.1.'),
+ q(PE,'A reduced fire-resistance-rated spandrel (below the normal 915 mm minimum) is permitted when:',['The building is under 15 m tall','The perimeter barrier system is tested, certified and listed for the intended spandrel specification','The façade uses only glass panels','It is never permitted regardless of testing'],1,'E.10.3: reduced spandrel height is allowed if the perimeter barrier system is tested, certified and listed with the intended spandrel specifications.'),
+ q(PE,'For a solid metal panel used on a non-fire-rated façade of a high-rise building, the panel must achieve which BS EN 13501-1 classification?',['B-s1-d0','C-s2-d1','A1 or A2-s1-d0','No classification required'],2,'Table E.11: high-rise buildings require the stricter Class A1 or A2-s1-d0 for the solid metal panel.'),
+ q(PE,'Signboards or billboards on a façade must be fire tested as part of the façade system when their cumulative surface area exceeds:',['20 m²','35 m²','50 m²','75 m²'],2,'E.10.9: signboards/billboards exceeding 50 m² cumulative area (or straddling more than one storey) require façade-system fire testing.'),
+ q(PE,'Outdoor mechanical equipment such as antennas and rooftop plant should be:',['Left fully visible for maintenance access','Concealed from public view by walls, screens, fences, parapets or landscaping','Always painted black','Located only on the ground floor'],1,'E.11: outdoor mechanical equipment should be concealed from public view per B.10.2.'),
+ q(PE,'Hanging lifelines and untensioned cables on a building maintenance working platform must be stabilized at intervals of:',['30 m or less','61 m or less','100 m or less','183 m or less'],1,'E.12.4: hanging lifelines/untensioned cables shall be stabilized at an initial 61 m and further intervals of 61 m or less.'),
+ q(PE,'Building anchors for maintenance equipment must be capable of sustaining, without failure, a load of:',['1.5 times the maximum anticipated load','2 times the maximum anticipated load','4 times the maximum anticipated load','6 times the maximum anticipated load'],2,'E.12.4: building anchors and stabilization components shall sustain at least 4 times the maximum anticipated load without failure.'),
+ q(PE,'The minimum design wind load required for each building maintenance anchor is:',['667 N or the building design wind load, whichever is higher','1,000 N or the building design wind load, whichever is higher','1,334 N or the building design wind load, whichever is higher','2,000 N or the building design wind load, whichever is higher'],2,'E.12.4: minimum design wind load per anchor is 1,334 N or the building\'s design wind load, whichever is higher.'),
+ q(PE,'The power circuit disconnect switch for a power-operated maintenance system shall be locked in which position during use?',['OFF','ON','Neutral','No locking is required during use'],1,'E.12.5: the disconnect switch shall be locked in the "ON" position when the equipment is in use.'),
+ q(PE,'A rope access back-up fall arrest system is typically achieved using:',['A single high-strength rope','Two ropes — a working line and a safety line','A steel cable only','No back-up system is required if IRATA-trained'],1,'E.12.7.1: a back-up fall arrest system may be achieved using two ropes — a working line and a safety line.'),
  ];
 }
 
+/* ============ Acronyms & Abbreviations glossary ============ */
+function seedAcronymsData(){
+ return [
+ ['A',[
+  ['AAV','Air admittance valve'],['AC','Alternating current'],['ACB','Air circuit breaker'],['ACI','American Concrete Institute'],
+  ['ADA','Americans with Disability Act'],['AHU','Air handling unit'],['AISC','American Institute of Steel Construction'],['ALS','Assistive listening system'],
+  ['AMCA','Air Movement and Control Association International, Inc.'],['ANSI','American National Standards Institute'],['APC','Angle polished connector'],
+  ['API','Application programming interface'],['ASCE','American Society of Civil Engineers'],['ASHRAE','American Society of Heating, Refrigeration, and Air-Conditioning Engineers'],
+  ['ASME','American Society of Mechanical Engineers'],['ASTM','ASTM International'],['ATC','Applied Technology Council'],['AV','Audio visual'],['AWS','American Welding Society']
+ ]],
+ ['B',[
+  ['BACnet','Building automation and control network'],['BAPV','Building attached photovoltaics'],['BDNS','Building device naming standard'],
+  ['BEP','Building entry point'],['BICSI','Building Industry Consulting Service International'],['BIM','Building information modelling'],
+  ['BIPV','Building integrated photovoltaics'],['BMS','Building management system'],['BMU','Building maintenance unit'],
+  ['BRE','Building Research Establishment'],['BS','British Standard'],['BS EN','British Standard European Norm']
+ ]],
+ ['C',[
+  ['CAFM','Computer aided facilities management'],['cap.','Capita'],['CFR','Code of Federal Regulations'],['Ch.','Chapter'],
+  ['CHS','Circular hollow section'],['CIBSE','Chartered Institution of Building Services Engineers'],['CIRIA','Construction Industry Research and Information Association'],
+  ['Cm','Cementitious materials'],['CNS','Common network system'],['CO','Carbon monoxide'],['CO2','Carbon dioxide'],
+  ['CPSC','Consumer Product Safety Commission'],['CPT','Cone penetration test'],['CRR','Cyclic resistance ratio'],
+  ['CRSI','Concrete Reinforcing Steel Institute'],['CSA','Canadian Standards Association'],['CSR','Cyclic stress ratio'],
+  ['CT','Current transformer'],['CWCT','Centre for Window and Cladding Technology']
+ ]],
+ ['D',[
+  ['d','Depth'],['DB','Distribution board'],['DBC','Dubai Building Code'],['DCAA','Dubai Civil Aviation Authority'],['DC','Direct current'],
+  ['DCD','Dubai Civil Defence'],['DCR','Development Control Regulations'],['DCS','Destination control system'],['DCV','Demand controlled ventilation'],
+  ['DD','Destination dispatch'],['DDA','Dubai Development Authority'],['DEWA','Dubai Electricity and Water Authority'],['DHA','Dubai Health Authority'],
+  ['DHCA','Dubai Healthcare City Authority'],['DHCP','Dynamic host configuration protocol'],['DIES','Dubai\'s Integrated Energy Strategy'],
+  ['DLTM','Dubai Local Transverse Mercator'],['DM','Dubai Municipality'],['DMD','Dubai Municipality datum'],['DM PH&SD','Dubai Municipality, health and safety department'],
+  ['DP','Double-pole'],['DRRG','Distributed renewable resource generation'],['DSCB','Dubai sustainable concrete baseline'],
+  ['DSOA','Dubai Silicon Oasis Authority'],['DTCM','Department of Tourism and Commerce Marketing'],['du','Service provider in Dubai']
+ ]],
+ ['E',[
+  ['ECC','Earth continuity conductor'],['EIA','Environment impact assessment'],['EIAC','Emirates International Accreditation Centre'],
+  ['EIAR','Environment impact assessment report'],['EIAS','Environment impact assessment summary'],['EID','Etisalat Identification'],
+  ['ELCB','Earth leakage circuit breaker'],['EM','Electromagnetic'],['EMC','Electromagnetic compatibility'],['EMI','Electromagnetic interference'],
+  ['Emicool','Emirates District Cooling LLC'],['Empower','Emirates Central Cooling Systems Corporation'],['ESMA','Emirates Authority for Standardization and Metrology'],
+  ['ETA','European technical assessment'],['Etisalat','Service provider in Dubai'],['ETS','Energy transfer station'],['EV','Electric vehicle'],['EVSE','Electric vehicle service equipment']
+ ]],
+ ['F',[
+  ['FAR','Floor area ratio'],['FCP','Fibre concentration point'],['FCU','Fan coil unit'],['FFL','Finished floor level'],
+  ['FGI','Facility Guidelines Institute'],['FGRP','Fibre glass reinforced plastic'],['FIC','Final inspection chamber'],['FM','Factory Mutual'],
+  ['FS','Factor of safety'],['FTR','Floor telecom room'],['FTTX','Fibre to the x']
+ ]],
+ ['G',[
+  ['G','Ground floor / ground level floor'],['GA','Gross area'],['GAID','Global Alliance for ICT and Development'],['GFA','Gross floor area'],
+  ['GGBS','Ground granulated blast-furnace slag'],['GIFR','Geotechnical investigation factual report'],['GIR','Geotechnical interpretative report'],
+  ['GPON','Gigabit passive optical network'],['GRP','Glass-reinforced plastic'],['GS','Galvanized steel'],['GSM','Global system for mobile communication']
+ ]],
+ ['H',[
+  ['h','Height'],['HC','Handling capacity'],['HCDC','Hall call destination control'],['HDPE','High density polyethylene'],
+  ['HDRF','Heavy duty return flange'],['HEX','Heat exchanger'],['HMI','Human-machine interface'],['HSE','Health and Safety Executive'],
+  ['HSS','Hollow structural section'],['HTM','Health technical memoranda'],['HV','High voltage'],['HVAC','Heating ventilation and conditioning']
+ ]],
+ ['I',[
+  ['IACAD','Islamic Affairs and Charitable Activities Department'],['IBC','International Building Code'],['IBS','In-building service'],
+  ['ICE','Institution of Civil Engineers'],['ICNIRP','International Commission on Non-Ionizing Radiation Protection'],['ICT','Information and communication technology'],
+  ['IEC','International Electrotechnical Commission'],['IEEE','Institute of Electrical and Electronic Engineers'],['IES','Illuminating Engineering Society'],
+  ['IETF','Internet Engineering Task Force'],['IFC','Industry foundation classes'],['IET','Institution of Engineering and Technology'],
+  ['IoT','Internet of Things'],['IP','Ingress protection / internet protocol'],['IRATA','Industrial Rope Access Trade Association'],
+  ['ISO','International Organization for Standardization'],['ISP','Inside plant'],['IT','Information technology']
+ ]],
+ ['J–L',[
+  ['JSON','JavaScript object notation'],['KHDA','Knowledge and Human Development Authority'],['KNX','Konnex'],['l','Length'],
+  ['LAN','Local area network'],['LC','Lucent connector'],['LCA','Lifecycle assessment'],['LDPE','Low density polyethylene'],
+  ['LoRaWAN','Long range wide area network'],['LPG','Liquefied petroleum gas'],['LPWAN','Low power wide area network'],
+  ['LRV','Light reflectance value'],['LSF','Low smoke and fume'],['LSZH','Low smoke zero halogen'],['LV','Low voltage']
+ ]],
+ ['M',[
+  ['MCB','Miniature circuit breaker'],['MCCB','Moulded case circuit breaker'],['MDB','Main distribution board'],['MEP','Mechanical, electrical and plumbing'],
+  ['MER','Main equipment room'],['MERV','Minimum efficiency reporting value'],['MMC','Meet-me-chamber'],['MMR','Meet-me-room'],
+  ['MNO','Mobile network operator'],['MPa','Megapascal'],['MQTT','Message queueing telemetry transport'],['MRI','Mean recurrence interval'],
+  ['MSR','Mobile service room'],['MTR','Main telecom room'],['MV','Medium voltage']
+ ]],
+ ['N–O',[
+  ['NA','Net area'],['NFPA','National Fire Protection Association'],['NG-PON2','Next generation PON2'],['NOC','No objection certificate'],
+  ['ODF','Optical distribution frame'],['OLT','Optical line terminal'],['ONT','Optical network terminal'],
+  ['OPC','Ordinary Portland cement / open platform communications'],['OSP','Outside plant'],['OT','Operational technology']
+ ]],
+ ['P',[
+  ['PAPA','Passive air pressure attenuators'],['PCI','Precast/prestressed Concrete Institute'],['PF','Power factor'],['PGA','Peak ground acceleration'],
+  ['PGD','Peak ground displacement'],['PGV','Peak ground velocity'],['PLC','Programme logic controller'],['PoE','Power over ethernet'],
+  ['PON','Passive optical network'],['psi','Pound per square inch'],['PT','Post-tensioned'],['PTI','Post-tensioning Institute'],
+  ['PTP','Preliminary test pile'],['PTV','Pendulum test value'],['PV','Photovoltaic'],['PVC','Polyvinyl chloride'],['PVC-U','Unplasticized poly(vinyl chloride)']
+ ]],
+ ['Q–R',[
+  ['QR','Quick response code'],['RCBO','Residual current operated circuit breaker with integral overcurrent protection'],['RCC','Reinforced concrete'],
+  ['RCCB','Residual current operated circuit breaker without integral overcurrent protection'],['RCD','Residual current device'],
+  ['RFI','Radio frequency interference'],['RHS','Rectangular hollow section'],['RMU','Ring main unit'],['RoHS','Restriction of hazardous substances'],
+  ['RTA','Roads and Transport Authority'],['RTMR','Rooftop mobile room'],['RTU','Remote terminal unit']
+ ]],
+ ['S',[
+  ['s','Seconds'],['SC','Standard connector'],['SCADA','Supervisory control and data acquisition system'],['SCI','Steel Construction Institute'],
+  ['SCS','Structured cabling system'],['SDN','Software-defined networking'],['SER','Secondary equipment rooms'],['SHS','Square hollow section'],
+  ['SI','International system of units'],['SIRA','Security Industry Regulatory Agency'],['SLD','Single line diagram'],['SM','Singlemode'],
+  ['SMACNA','Sheet Metal and Air-Conditioning Contractors National Association'],['SMDB','Sub-main distribution board'],['SP','Service provider'],
+  ['SPD','Surge protection device'],['SPERWall','Specification for piling and embedded retaining walls'],['SPT','Standard penetration test'],
+  ['SRI','Solar reflectance index'],['STP','Shielded twisted pair']
+ ]],
+ ['T',[
+  ['TCL','Total connected load'],['TCP/IP','Transmission control protocol/internet protocol'],['TIA','Traffic impact assessment'],
+  ['TIS','Traffic impact study'],['TMS','The Masonry Society'],['TN','Technical note'],['TO','Telecommunications outlet'],
+  ['TP','Three phase'],['TRA','Telecommunications Regulatory Authority'],['Trakhees','Department of Planning and Development - Ports Customs and Freezone Corporation'],
+  ['TSE','Treated sewage effluent'],['TVOC','Total volatile organic compound'],['TWA','Time weighted average']
+ ]],
+ ['U–Z',[
+  ['UAE FLSC','UAE Fire and Life Safety Code of Practice'],['UFC','Unified Facilities Criteria'],['UK NA','UK National Annex to Eurocode'],
+  ['UL','Underwriters Laboratories'],['UTP','Unshielded twisted pair'],['UV','Undervoltage'],['VC','Valve chamber'],['VFD','Variable frequency drive'],
+  ['VOC','Volatile organic compound'],['VPN','Virtual private network'],['VT','Vertical transportation / voltage transformer'],
+  ['VVVF','Variable voltage and variable frequency'],['W','Width'],['w/c','Water/cement ratio'],['WAI','Weighted average impact'],
+  ['WWR','Window to wall ratio'],['XG-PON','10 gigabit PON'],['XGS-PON','Symmetric XG-PON'],['XML','Extensible mark-up language']
+ ]]
+ ];
+}
+function buildAcronymSection(){
+  var data=seedAcronymsData();
+  var notes=data.map(function(group){
+    var lines=group[1].map(function(pair){return '- '+pair[0]+' \u2014 '+pair[1];}).join('\n');
+    return '## '+group[0]+'\n'+lines;
+  }).join('\n');
+  notes='This glossary lists every acronym/abbreviation used across the Dubai Building Code. Admin can mark specific terms as "important" in Manage \u2192 Acronym Bank \u2014 only those marked terms are used to generate exam questions.\n\n'+notes;
+  return {id:uid(),title:'Acronyms & Abbreviations',imgs:[],notes:notes};
+}
+var DEFAULT_IMPORTANT_ACRONYMS=['DBC','DEWA','DCD','SIRA','TRA','RTA','DCAA','DDA','DSOA','KHDA','IACAD','DTCM','DHA','MEP','HVAC','FCU','RCD','MCB','MCCB','DB','MDB','SMDB','GFA','FAR','GA','NA','BMS','BMU','LPG','EV','EVSE','PV','WWR','SRI','GIR','DCR','DLTM','VT','VVVF','DCS','ASCE','ACI','AISC','ASHRAE','NFPA','UAE FLSC','PTV','LRV','ETS','MTR','FTR','ODF','IRATA','Etisalat','du','BS','BS EN','IEC'];
+function buildAcronymList(){
+  var data=seedAcronymsData();
+  var list=[];
+  data.forEach(function(group){
+    group[1].forEach(function(pair){
+      list.push({id:uid(),term:pair[0],def:pair[1],important:DEFAULT_IMPORTANT_ACRONYMS.indexOf(pair[0])>=0});
+    });
+  });
+  return list;
+}
+function shuffleArr(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+function genAcronymQuestions(c,count){
+  var important=(c.acronyms||[]).filter(function(a){return a.important;});
+  if(important.length<4||count<=0)return[];
+  var picks=shuffleArr(important).slice(0,Math.min(count,important.length));
+  return picks.map(function(item){
+    var distractSource=important.filter(function(a){return a.id!==item.id;});
+    var distractors=shuffleArr(distractSource).slice(0,3).map(function(a){return a.def;});
+    var opts=shuffleArr(distractors.concat([item.def]));
+    var correctIdx=opts.indexOf(item.def);
+    return {id:'acr-'+uid(),sec:'Acronyms & Abbreviations',q:'What does "'+item.term+'" stand for in the DBC?',opts:opts,c:correctIdx,ex:item.term+' = '+item.def+'.'};
+  });
+}
+function materializeAcronymQuestions(c){
+  var important=(c.acronyms||[]).filter(function(a){return a.important;});
+  if(important.length<4)return 0;
+  var existingTerms={};
+  c.questions.forEach(function(q){if(q.acrTerm)existingTerms[q.acrTerm]=true;});
+  var added=0;
+  important.forEach(function(item){
+    if(existingTerms[item.term])return;
+    var distractSource=important.filter(function(a){return a.id!==item.id;});
+    var distractors=shuffleArr(distractSource).slice(0,3).map(function(a){return a.def;});
+    if(distractors.length<3)return;
+    var opts=shuffleArr(distractors.concat([item.def]));
+    var correctIdx=opts.indexOf(item.def);
+    c.questions.push({id:uid(),sec:'Acronyms & Abbreviations',q:'What does "'+item.term+'" stand for in the DBC?',opts:opts,c:correctIdx,ex:item.term+' = '+item.def+'.',acrTerm:item.term});
+    added++;
+  });
+  return added;
+}
 function renderNotes(txt,imgs){
   imgs=imgs||[];
   var box=div('notes'),lines=String(txt||'').split('\n'),i=0;
@@ -458,7 +848,7 @@ function modal(title,bodyNodes,wide){
 function vDash(){
   var w=div('',[
     el('div',{cls:'eyebrow',text:'Dashboard'}),
-    el('h1',{cls:'page',text:'Regulation Categories'}),
+    el('h1',{cls:'page',text:'UAE Regulations'}),
     el('p',{cls:'sub',text:'Study reference documents, revise section notes, then sit the certification exam.'})
   ]);
   var g=div('catgrid');
@@ -502,13 +892,13 @@ function vCat(cid,tab){
     el('h1',{cls:'page',text:c.name,style:'margin-top:8px'}),
     el('p',{cls:'sub',text:c.desc})
   ]);
-  var tabs=[['study','Study Center'],['docs','Documents'],['exam','Exam'],['results','My Results']];
+  var tabs=[['study','Study Center'],['questions','Questions'],['exam','Exam'],['results','My Results']];
   if(S.adminOn)tabs.push(['manage','⚙ Manage']);
   var tb=div('tabs');
   tabs.forEach(function(t){tb.appendChild(el('button',{cls:'tab'+(t[0]===tab?' on':''),text:t[1],onclick:function(){vCat(cid,t[0]);}}));});
   w.appendChild(tb);
   var body=div('');w.appendChild(body);
-  if(tab==='docs')tabDocs(c,body);
+  if(tab==='questions')tabQuestions(c,body);
   if(tab==='study')tabStudy(c,body);
   if(tab==='exam')tabExam(c,body);
   if(tab==='results')tabResults(c,body);
@@ -516,10 +906,62 @@ function vCat(cid,tab){
   mount(w);
 }
 
-function tabDocs(c,body){
+var openQSecs={};
+function tabQuestions(c,body){
+  if(!c.sections.length){body.appendChild(div('emptybox',['No sections yet — add sections in Study Center first.']));return;}
+  c.sections.forEach(function(s,i){
+    var secQs=c.questions.filter(function(q){return q.sec===s.title;});
+    var card=div('studysec card');
+    var chev=el('span',{cls:'chev',text:'▾'});
+    var badge=el('span',{cls:'pill',style:'margin-left:8px',text:secQs.length+' question'+(secQs.length===1?'':'s')});
+    var head=el('h3',{},[div('snum',[String(i+1)]),el('span',{cls:'stitle',text:s.title}),badge,chev]);
+    card.appendChild(head);
+    var bodyBox=div('secbody');
+    if(!secQs.length){
+      bodyBox.appendChild(div('emptybox',['No questions in this section yet.']));
+    }else{
+      secQs.forEach(function(q,qi){
+        var qcard=el('div',{cls:'rvq card ok',style:'margin-bottom:10px'});
+        qcard.appendChild(el('div',{cls:'rq',text:(qi+1)+'. '+q.q}));
+        q.opts.forEach(function(o,oi){
+          var isCorrect=oi===q.c;
+          qcard.appendChild(el('div',{cls:'ra',style:'color:'+(isCorrect?'var(--green-dk)':'var(--muted)')+';font-weight:'+(isCorrect?'700':'400'),
+            text:(isCorrect?'✓ ':'')+String.fromCharCode(65+oi)+'. '+o}));
+        });
+        if(q.ex)qcard.appendChild(div('expl',['💡 '+q.ex]));
+        if(S.adminOn){
+          var arow=el('div',{style:'margin-top:8px;display:flex;gap:8px'});
+          arow.appendChild(btn('✎ Edit','sm',function(){admEditQ(c,q,'questions');}));
+          arow.appendChild(armBtn(btn('Delete','sm dngr',null),function(){
+            c.questions=c.questions.filter(function(x){return x.id!==q.id;});save();toast('Deleted');vCat(c.id,'questions');
+          },'Delete'));
+          qcard.appendChild(arow);
+        }
+        bodyBox.appendChild(qcard);
+      });
+    }
+    if(S.adminOn)bodyBox.appendChild(btn('＋ Add question to '+s.title,'',function(){admEditQ(c,null,'questions',s.title);}));
+    var open=!!openQSecs[s.id];
+    var tog=el('button',{cls:'togbar'},['▾ Show questions']);
+    function apply(){
+      bodyBox.style.display=open?'':'none';
+      tog.textContent=open?'▴ Hide questions':'▾ Show questions';
+      chev.textContent=open?'▴':'▾';
+    }
+    function toggle(){open=!open;openQSecs[s.id]=open;apply();}
+    head.addEventListener('click',toggle);
+    tog.addEventListener('click',toggle);
+    apply();
+    card.appendChild(tog);
+    card.appendChild(bodyBox);
+    body.appendChild(card);
+  });
   if(S.adminOn){
+    var pdfOpen=false;
+    var pdfHead=el('button',{cls:'togbar',style:'margin-top:6px'},['▾ Reference PDFs ('+c.docs.length+')']);
+    var pdfBody=el('div',{cls:'secbody',style:'display:none'});
     var urlI=el('input',{placeholder:'https://sdmbrk.github.io/docs/DBC-A.pdf',type:'url'});
-    var ub=div('admbox card',[el('h3',{text:'🔗 Add PDF from URL (works on mobile)'}),
+    pdfBody.appendChild(div('admbox card',[el('h3',{text:'🔗 Add PDF from URL (works on mobile)'}),
       el('p',{cls:'sub',style:'margin-bottom:10px',text:'Host your PDFs on GitHub Pages (sdmbrk.github.io) or any CORS-enabled server, paste the direct link, and the app downloads and stores it permanently in this browser.'}),
       div('field',[urlI]),
       btn('⬇ Fetch & save PDF','pri',function(){
@@ -534,14 +976,13 @@ function tabDocs(c,body){
           var id=uid();
           var name=decodeURIComponent(u.split('/').pop().split('?')[0])||'document.pdf';
           pdfPut({id:id,name:name,data:buf},function(){
-            c.docs.push({id:id,name:name,size:buf.byteLength});save();toast('PDF saved — '+fmtBytes(buf.byteLength));vCat(c.id,'docs');
+            c.docs.push({id:id,name:name,size:buf.byteLength});save();toast('PDF saved — '+fmtBytes(buf.byteLength));vCat(c.id,'questions');
           });
         }).catch(function(){
           toast('Download failed — check the URL. GitHub Pages links work; some servers block cross-origin requests.');
         });
       })
-    ]);
-    body.appendChild(ub);
+    ]));
     var up=div('admbox card',[el('h3',{text:'📤 Upload reference PDF from device'}),
       el('p',{cls:'sub',style:'margin-bottom:10px',text:'Use this when the app is opened directly in a browser (like Chrome) rather than an embedded viewer.'}),
       el('input',{type:'file',accept:'application/pdf',id:'pdfup'})]);
@@ -551,27 +992,31 @@ function tabDocs(c,body){
       fr.onload=function(){
         var id=uid();
         pdfPut({id:id,name:f.name,data:fr.result},function(){
-          c.docs.push({id:id,name:f.name,size:f.size});save();toast('PDF saved');vCat(c.id,'docs');
+          c.docs.push({id:id,name:f.name,size:f.size});save();toast('PDF saved');vCat(c.id,'questions');
         });
       };
       fr.readAsArrayBuffer(f);
     });
-    body.appendChild(up);
+    pdfBody.appendChild(up);
+    if(c.docs.length){
+      var list=div('doclist');
+      c.docs.forEach(function(d){
+        var row=div('docrow card',[div('dico',['PDF']),
+          el('div',{},[el('div',{cls:'dnm',text:d.name}),el('div',{cls:'dsz',text:fmtBytes(d.size)})]),
+          div('dsp'),
+          btn('Open','sm pri',function(){openPdf(c,d);})]);
+        row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){
+          pdfDel(d.id,function(){c.docs=c.docs.filter(function(x){return x.id!==d.id;});save();toast('Deleted');vCat(c.id,'questions');});
+        },'Delete'));
+        list.appendChild(row);
+      });
+      pdfBody.appendChild(list);
+      var vb=div('viewerbox');vb.id='pdfviewer';pdfBody.appendChild(vb);
+    }
+    pdfHead.addEventListener('click',function(){pdfOpen=!pdfOpen;pdfBody.style.display=pdfOpen?'':'none';pdfHead.textContent=(pdfOpen?'▴':'▾')+' Reference PDFs ('+c.docs.length+')';});
+    body.appendChild(pdfHead);
+    body.appendChild(pdfBody);
   }
-  if(!c.docs.length){body.appendChild(div('emptybox',['No reference documents yet.'+(S.adminOn?'':' Ask an admin to add the code PDFs.')]));return;}
-  var list=div('doclist');
-  c.docs.forEach(function(d){
-    var row=div('docrow card',[div('dico',['PDF']),
-      el('div',{},[el('div',{cls:'dnm',text:d.name}),el('div',{cls:'dsz',text:fmtBytes(d.size)})]),
-      div('dsp'),
-      btn('Open','sm pri',function(){openPdf(c,d);})]);
-    if(S.adminOn){row.appendChild(armBtn(btn('Delete','sm dngr',null),function(){
-      pdfDel(d.id,function(){c.docs=c.docs.filter(function(x){return x.id!==d.id;});save();toast('Deleted');vCat(c.id,'docs');});
-    },'Delete'));}
-    list.appendChild(row);
-  });
-  body.appendChild(list);
-  var vb=div('viewerbox');vb.id='pdfviewer';body.appendChild(vb);
 }
 function openPdf(c,d){
   pdfGet(d.id,function(rec){
@@ -633,27 +1078,63 @@ function tabStudy(c,body){
 
 function tabExam(c,body){
   if(!c.questions.length){body.appendChild(div('emptybox',['No questions in the bank yet.']));return;}
-  var n=Math.min(c.quizCount||20,c.questions.length);
+  var n=Math.min(c.quizCount||50,c.questions.length);
   var pm=c.passMark||70;
+  var importantAcr=(c.acronyms||[]).filter(function(a){return a.important;}).length;
+  var acrWant=Math.min(c.acronymQuizCount||0,importantAcr,n);
   var intro=div('result card',[
     el('div',{cls:'eyebrow',text:c.examName}),
     el('h2',{cls:'sec',style:'margin-top:4px',text:'Ready to start?'}),
-    el('p',{cls:'rline',text:n+' questions drawn from a bank of '+c.questions.length+' · Pass mark '+pm+'% · Instant scoring'}),
+    el('p',{cls:'rline',text:n+' questions total · 10 seconds per question · Pass mark '+pm+'%'+(acrWant?' · final '+acrWant+' questions are acronyms/abbreviations':'')}),
     btn('Start Exam','pri',function(){startQuiz(c,n);})
   ]);
   body.appendChild(intro);
 }
 var QZ=null;
+var examTimeLeft=10,examTimerQIndex=-1,examTimerHandle=null;
+function clearExamTimer(){if(examTimerHandle){clearInterval(examTimerHandle);examTimerHandle=null;}examTimerQIndex=-1;}
+function examTimerTick(){
+  examTimeLeft--;
+  var numEl=document.getElementById('qtimernum'),barEl=document.getElementById('qtimerbar');
+  var color=examTimeLeft<=2?'#C0392B':(examTimeLeft<=5?'#C9A227':'#0E7C7B');
+  if(numEl){numEl.textContent=examTimeLeft;numEl.style.background=color;}
+  if(barEl){barEl.style.width=Math.max(0,examTimeLeft/10*100)+'%';barEl.style.background=color;}
+  if(examTimeLeft<=0){
+    clearInterval(examTimerHandle);examTimerHandle=null;
+    examTimerAdvance();
+  }
+}
+function examTimerAdvance(){
+  if(!QZ)return;
+  var n=QZ.qs.length;
+  if(QZ.cur<n-1){QZ.cur++;vQuiz();}
+  else{finishQuiz();}
+}
 function startQuiz(c,n){
-  var pool=c.questions.slice();
-  for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t;}
-  QZ={cid:c.id,qs:pool.slice(0,n),ans:new Array(n).fill(-1),cur:0};
+  clearExamTimer();
+  var importantCount=(c.acronyms||[]).filter(function(a){return a.important;}).length;
+  var acrWant=Math.min(c.acronymQuizCount||0,importantCount,n);
+  var staticN=Math.max(0,n-acrWant);
+  var staticPool=shuffleArr(c.questions.filter(function(q){return q.sec!=='Acronyms & Abbreviations';}));
+  var staticQs=staticPool.slice(0,Math.min(staticN,staticPool.length));
+  var acrQs=acrWant>0?genAcronymQuestions(c,acrWant):[];
+  var combined=staticQs.concat(acrQs);
+  QZ={cid:c.id,qs:combined,ans:new Array(combined.length).fill(-1),cur:0};
   vQuiz();
 }
 function vQuiz(){
   var c=cat(QZ.cid),i=QZ.cur,q=QZ.qs[i],n=QZ.qs.length;
+  if(examTimerQIndex!==i){
+    if(examTimerHandle){clearInterval(examTimerHandle);examTimerHandle=null;}
+    examTimeLeft=10;examTimerQIndex=i;
+    examTimerHandle=setInterval(examTimerTick,1000);
+  }
+  var tColor=examTimeLeft<=2?'#C0392B':(examTimeLeft<=5?'#C9A227':'#0E7C7B');
+  var unansSoFar=QZ.ans.filter(function(a){return a<0;}).length;
+  var skipLabel='⏭ Skip & Finish'+(unansSoFar?' ('+unansSoFar+' unanswered)':'');
+  var skipBtn=armBtn(btn(skipLabel,'sm dngr',null),function(){finishQuiz();},skipLabel);
   var w=div('qwrap',[
-    div('crumb',[el('button',{text:'‹ Exit exam',onclick:function(){vCat(c.id,'exam');}}),div('dsp'),el('b',{text:c.examName})]),
+    div('crumb',[el('button',{text:'‹ Exit exam',onclick:function(){clearExamTimer();vCat(c.id,'exam');}}),skipBtn,div('dsp'),el('b',{text:c.examName})]),
     div('qprog',[el('i',{style:'width:'+Math.round((i+1)/n*100)+'%'})])
   ]);
   var dots=div('qdots');
@@ -661,7 +1142,16 @@ function vQuiz(){
     dots.appendChild(el('button',{cls:'qdot'+(QZ.ans[di]>=0?' ans':'')+(di===i?' cur':''),text:String(di+1),onclick:function(){QZ.cur=di;vQuiz();}}));
   });
   w.appendChild(dots);
-  var qc=div('qcard card',[el('div',{cls:'qnum',text:'Question '+(i+1)+' of '+n+' · '+q.sec}),el('div',{cls:'qtext',text:q.q})]);
+  var qc=div('qcard card');
+  var timerRow=el('div',{cls:'qtimer'},[
+    el('div',{id:'qtimernum',style:'width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;background:'+tColor+';flex-shrink:0'},[String(examTimeLeft)]),
+    el('div',{style:'flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden'},[
+      el('div',{id:'qtimerbar',style:'display:block;height:100%;width:'+Math.max(0,examTimeLeft/10*100)+'%;background:'+tColor+';transition:width 1s linear,background .3s'})
+    ])
+  ]);
+  qc.appendChild(timerRow);
+  qc.appendChild(el('div',{cls:'qnum',text:'Question '+(i+1)+' of '+n+' · '+q.sec}));
+  qc.appendChild(el('div',{cls:'qtext',text:q.q}));
   q.opts.forEach(function(o,oi){
     var opt=div('opt'+(QZ.ans[i]===oi?' sel':''),[div('ol',[String.fromCharCode(65+oi)]),el('span',{text:o})]);
     opt.addEventListener('click',function(){QZ.ans[i]=oi;vQuiz();});
@@ -682,12 +1172,13 @@ function vQuiz(){
   mount(w);
 }
 function finishQuiz(){
+  clearExamTimer();
   var c=cat(QZ.cid),n=QZ.qs.length,score=0;
   QZ.qs.forEach(function(q,i){if(QZ.ans[i]===q.c)score++;});
   var pm=c.passMark||70;
   var pct=Math.round(score/n*100),pass=pct>=pm;
   var vid='SDM-'+c.id.split('-').map(function(p){return p[0].toUpperCase();}).join('')+'-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+uid();
-  var rec={id:uid(),cat:c.id,exam:c.examName,name:'',score:score,total:n,pct:pct,pass:pass,passMark:pm,date:todayStr(),vid:vid,qs:QZ.qs.map(function(q,i){return{q:q.q,opts:q.opts,c:q.c,a:QZ.ans[i],ex:q.ex};})};
+  var rec={id:uid(),cat:c.id,exam:c.examName,name:S.userName||'',score:score,total:n,pct:pct,pass:pass,passMark:pm,date:todayStr(),vid:vid,qs:QZ.qs.map(function(q,i){return{q:q.q,opts:q.opts,c:q.c,a:QZ.ans[i],ex:q.ex,sec:q.sec};})};
   S.results.push(rec);save();
   vResult(rec);
 }
@@ -703,20 +1194,40 @@ function vResult(r){
     el('p',{cls:'rline',text:r.pass?'Congratulations — you met the '+(r.passMark||70)+'% pass mark. Verification ID '+r.vid:'Pass mark is '+(r.passMark||70)+'%. Review the sections below and try again.'}),
     el('div',{style:'display:flex;gap:10px;justify-content:center;flex-wrap:wrap'},[
       r.pass?btn('⬇ Download Certificate','grn',function(){openCert(r);}):btn('↻ Retake Exam','pri',function(){vCat(r.cat,'exam');}),
+      r.qs&&r.qs.length?btn('📄 Download Review PDF','',function(){downloadReviewPdf(r);}):null,
       btn('Study Center','',function(){vCat(r.cat,'study');}),
       btn('Dashboard','',function(){vDash();})
     ])
   ])]);
   if(r.qs){
-    var rv=div('review',[el('h2',{cls:'sec',text:'Answer review'})]);
+    var correctN=0,wrongN=0,unansN=0;
+    r.qs.forEach(function(q){if(q.a<0)unansN++;else if(q.a===q.c)correctN++;else wrongN++;});
+    var rv=div('review');
+    rv.appendChild(el('h2',{cls:'sec',text:'Answer Review'}));
+    rv.appendChild(el('div',{style:'display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px'},[
+      el('span',{cls:'pill',style:'background:var(--green-soft);color:var(--green-dk);font-size:13px;padding:6px 14px',text:'✓ '+correctN+' correct'}),
+      el('span',{cls:'pill',style:'background:var(--red-soft);color:var(--red);font-size:13px;padding:6px 14px',text:'✗ '+wrongN+' incorrect'}),
+      unansN?el('span',{cls:'pill',style:'background:var(--bg);color:var(--muted);border:1px solid var(--line);font-size:13px;padding:6px 14px',text:'— '+unansN+' unanswered'}):null
+    ]));
     r.qs.forEach(function(q,i){
       var ok=q.a===q.c;
-      rv.appendChild(div('rvq card '+(ok?'ok':'bad'),[
-        el('div',{cls:'rq',text:(i+1)+'. '+q.q}),
-        el('div',{cls:'ra',text:'Your answer: '+(q.a>=0?String.fromCharCode(65+q.a)+'. '+q.opts[q.a]:'— not answered'),style:'color:'+(ok?'var(--green-dk)':'var(--red)')}),
-        ok?null:el('div',{cls:'ra',text:'Correct: '+String.fromCharCode(65+q.c)+'. '+q.opts[q.c],style:'color:var(--green-dk)'}),
-        q.ex?div('expl',['💡 '+q.ex]):null
-      ]));
+      var qcard=el('div',{cls:'rvq card '+(ok?'ok':'bad')});
+      qcard.appendChild(el('div',{cls:'rq',text:(i+1)+'. '+q.q}));
+      if(q.sec)qcard.appendChild(el('div',{style:'font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:-2px 0 8px',text:q.sec}));
+      var optsBox=el('div',{style:'margin-top:4px'});
+      q.opts.forEach(function(o,oi){
+        var isCorrect=oi===q.c;
+        var isYourWrong=oi===q.a&&!ok;
+        var color=isCorrect?'var(--green-dk)':(isYourWrong?'var(--red)':'var(--muted)');
+        var weight=isCorrect||isYourWrong?'700':'400';
+        var prefix=isCorrect?'✓ ':(isYourWrong?'✗ ':'');
+        var suffix=isCorrect?'  (correct answer)':(isYourWrong?'  (your answer)':'');
+        optsBox.appendChild(el('div',{cls:'ra',style:'color:'+color+';font-weight:'+weight+';padding:2px 0',text:prefix+String.fromCharCode(65+oi)+'. '+o+suffix}));
+      });
+      qcard.appendChild(optsBox);
+      if(q.a<0)qcard.appendChild(el('div',{cls:'ra',style:'color:var(--muted);font-style:italic;margin-top:4px',text:'You did not answer this question in time.'}));
+      if(q.ex)qcard.appendChild(div('expl',['💡 '+q.ex]));
+      rv.appendChild(qcard);
     });
     w.appendChild(rv);
   }
@@ -755,6 +1266,29 @@ function refreshAdm(){
   var b=document.getElementById('admbtn');
   b.textContent='Admin: '+(S.adminOn?'ON':'OFF');
   b.classList.toggle('on',S.adminOn);
+}
+function refreshNameBtn(){
+  var b=document.getElementById('namebtn');
+  if(!b)return;
+  b.textContent=S.userName?'👤 '+S.userName:'👤 Set name';
+}
+function promptForName(isInitial){
+  var inp=el('input',{placeholder:'e.g. Ahmed Khan'});
+  inp.value=S.userName||'';
+  var kids=[
+    el('p',{cls:'sub',style:'margin-bottom:12px',text:'Used to pre-fill your name on certificates and exam results — you can change it anytime by tapping the name button.'}),
+    div('field',[el('label',{text:'Your name'}),inp]),
+    el('div',{style:'display:flex;gap:10px;flex-wrap:wrap'},[
+      btn('Save','pri',function(){
+        S.userName=inp.value.trim();save();refreshNameBtn();m.remove();
+        if(isInitial)vDash();
+        else toast('Name saved');
+      }),
+      isInitial?btn('Skip for now','',function(){m.remove();vDash();}):null
+    ])
+  ];
+  var m=modal(isInitial?'Welcome — what\'s your name?':'Change your name',kids,false);
+  inp.focus();
 }
 function admAddCat(){
   var nm=el('input',{placeholder:'e.g. Dubai Civil Defense'});
@@ -814,11 +1348,57 @@ function tabManage(c,body){
   ]));
   if(c.id==='dubai-codes'){
     body.appendChild(div('admbox card',[el('h3',{text:'🔄 Reset study sections'}),
-      el('p',{cls:'sub',style:'margin-bottom:10px',text:'Replaces all Study Center sections with the 10 official DBC Parts (A, B, C, D, E, F, G, H, J, K — matching the code\'s contents page). Parts with no source content yet are added as empty placeholders ready for editing. This does not touch the question bank, documents, or results. Two taps to confirm.'}),
-      armBtn(btn('Reset to official 10 Parts (A–K)','dngr',null),function(){
-        c.sections=seedOfficialParts();save();toast('Study sections reset to the official 10-Part structure');vCat(c.id,'manage');
-      },'Reset to official 10 Parts (A–K)')
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'Replaces all Study Center sections with the official DBC Parts (A–K) plus the Acronyms & Abbreviations glossary — matching the code\'s contents page. This does not touch the question bank, documents, results, or your acronym "important" selections. Two taps to confirm.'}),
+      armBtn(btn('Reset to official structure (A–K + Acronyms)','dngr',null),function(){
+        c.sections=seedOfficialParts();save();toast('Study sections reset to the official structure');vCat(c.id,'manage');
+      },'Reset to official structure (A–K + Acronyms)')
     ]));
+    var acrImportant=(c.acronyms||[]).filter(function(a){return a.important;}).length;
+    var acrOpen=false;
+    var acrHead=el('button',{cls:'togbar',style:'margin-top:6px'},['▾ 🔤 Acronym Bank ('+acrImportant+' of '+(c.acronyms||[]).length+' marked important)']);
+    var acrBody=el('div',{style:'display:none;margin-top:10px'});
+    var qcI=el('input',{type:'number',min:'0',value:String(c.acronymQuizCount||0)});
+    var materializedCount=c.questions.filter(function(q){return q.acrTerm;}).length;
+    acrBody.appendChild(div('admbox card',[
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'Only terms marked \u2713 important below are used to generate exam questions. Each exam appends this many acronym questions at the very end, drawn fresh each time.'}),
+      div('field',[el('label',{text:'Acronym questions per exam'}),qcI]),
+      btn('Save count','pri',function(){
+        var v=Math.max(0,parseInt(qcI.value)||0);c.acronymQuizCount=v;save();toast('Saved — '+v+' acronym question(s) per exam');vCat(c.id,'manage');
+      }),
+      el('div',{style:'height:12px'}),
+      el('p',{cls:'sub',style:'margin-bottom:10px',text:'The above only affects the live exam draw. To make marked-important acronyms show up permanently in the Questions tab (viewable, admin-editable, deletable — currently '+materializedCount+' added), add them to the question bank below.'}),
+      btn('＋ Add marked-important acronyms to Question Bank','pri',function(){
+        var n=materializeAcronymQuestions(c);
+        if(n){save();toast(n+' acronym question(s) added to the Question Bank');vCat(c.id,'manage');}
+        else toast('Nothing new to add — either no terms are marked important, or they\'re already added');
+      })
+    ]));
+    var searchI=el('input',{placeholder:'Search term or definition…',type:'search'});
+    var listBox=el('div',{style:'max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:9px;padding:6px;margin-top:10px'});
+    function renderAcrList(filter){
+      listBox.innerHTML='';
+      var f=(filter||'').toLowerCase();
+      (c.acronyms||[]).forEach(function(a){
+        if(f&&a.term.toLowerCase().indexOf(f)<0&&a.def.toLowerCase().indexOf(f)<0)return;
+        var row=el('label',{style:'display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-bottom:1px solid var(--bg);cursor:pointer;font-size:13.5px'});
+        var cb=el('input',{type:'checkbox'});cb.checked=a.important;
+        cb.addEventListener('change',function(){a.important=cb.checked;save();acrHead.textContent=(acrOpen?'\u25b4':'\u25b6')+' \ud83d\udd24 Acronym Bank ('+(c.acronyms||[]).filter(function(x){return x.important;}).length+' of '+(c.acronyms||[]).length+' marked important)';});
+        row.appendChild(cb);
+        row.appendChild(el('span',{},[el('b',{text:a.term}),el('span',{text:' \u2014 '+a.def})]));
+        listBox.appendChild(row);
+      });
+      if(!listBox.children.length)listBox.appendChild(el('div',{cls:'sub',style:'padding:10px',text:'No matches.'}));
+    }
+    searchI.addEventListener('input',function(){renderAcrList(searchI.value);});
+    renderAcrList('');
+    acrBody.appendChild(div('admbox card',[
+      el('h3',{text:'All acronyms ('+(c.acronyms||[]).length+')'}),
+      div('field',[searchI]),
+      listBox
+    ]));
+    acrHead.addEventListener('click',function(){acrOpen=!acrOpen;acrBody.style.display=acrOpen?'':'none';acrHead.textContent=(acrOpen?'\u25b4':'\u25b6')+' \ud83d\udd24 Acronym Bank ('+(c.acronyms||[]).filter(function(x){return x.important;}).length+' of '+(c.acronyms||[]).length+' marked important)';});
+    body.appendChild(acrHead);
+    body.appendChild(acrBody);
   }
   var sbox=div('admbox card',[el('h3',{text:'📖 Study sections ('+c.sections.length+')'})]);
   c.sections.forEach(function(s,i){
@@ -951,12 +1531,13 @@ function admEditSection(c,s,returnTab){
     })
   ],true);
 }
-function admEditQ(c,q){
-  var isNew=!q;if(isNew)q={id:uid(),sec:'',q:'',opts:['','','',''],c:0,ex:''};
+function admEditQ(c,q,returnTab,defaultSec){
+  var rt=returnTab||'manage';
+  var isNew=!q;if(isNew)q={id:uid(),sec:defaultSec||'',q:'',opts:['','','',''],c:0,ex:''};
   var secI=el('select');
   c.sections.forEach(function(s){secI.appendChild(el('option',{value:s.title,text:s.title}));});
   secI.appendChild(el('option',{value:'General',text:'General'}));
-  secI.value=q.sec||'General';
+  secI.value=q.sec||defaultSec||'General';
   var qI=el('textarea',{style:'min-height:60px'});qI.value=q.q;
   var oIs=q.opts.map(function(o,i){var inp=el('input',{placeholder:'Option '+String.fromCharCode(65+i)});inp.value=o;return inp;});
   var cI=el('select');['A','B','C','D'].forEach(function(L,i){cI.appendChild(el('option',{value:String(i),text:L}));});
@@ -972,13 +1553,13 @@ function admEditQ(c,q){
     if(missing){toast('All 4 options required');return;}
     q.sec=secI.value;q.q=qI.value.trim();q.opts=oIs.map(function(o){return o.value.trim();});q.c=parseInt(cI.value);q.ex=exI.value;
     if(isNew)c.questions.push(q);
-    save();m.remove();vCat(c.id,'manage');toast('Question saved');
+    save();m.remove();vCat(c.id,rt);toast('Question saved');
   }));
   var m=modal((isNew?'Add':'Edit')+' question',kids,true);
 }
 
 function openCert(r){
-  var nmI=el('input',{placeholder:'Full name as it should appear'});nmI.value=r.name||'';
+  var nmI=el('input',{placeholder:'Full name as it should appear'});nmI.value=r.name||S.userName||'';
   var cv=el('canvas',{cls:'certprev'});
   function redraw(){r.name=nmI.value;drawCert(cv,r);}
   nmI.addEventListener('input',redraw);
@@ -1069,6 +1650,59 @@ function drawSeal(x,cx,cy,R){
   x.beginPath();x.moveTo(cx+46,cy+R*0.8);x.lineTo(cx+26,cy+R+74);x.lineTo(cx+6,cy+R+50);x.lineTo(cx+6,cy+R*0.8);x.closePath();x.fill();
   x.restore();
 }
+function downloadReviewPdf(r){
+  function make(){
+    var pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var pageW=210,pageH=297,margin=16,maxW=pageW-margin*2;
+    var y=margin;
+    function addFooter(){
+      pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(140,148,143);
+      pdf.text('Sdmbrk Collections - Regulatory Learning & Certification Portal',margin,pageH-8);
+    }
+    function ensureSpace(need){
+      if(y+need>pageH-margin){addFooter();pdf.addPage();y=margin;}
+    }
+    pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(14,124,123);
+    pdf.text('SDMBRK COLLECTIONS',margin,y);y+=6;
+    pdf.setFont('helvetica','bold');pdf.setFontSize(18);pdf.setTextColor(28,36,34);
+    pdf.text('Exam Answer Review',margin,y);y+=8;
+    pdf.setFont('helvetica','normal');pdf.setFontSize(11);pdf.setTextColor(95,107,103);
+    pdf.text(r.exam,margin,y);y+=6;
+    pdf.setFontSize(10);
+    var metaLine=(r.name?r.name+' - ':'')+r.date+' - Score '+r.score+'/'+r.total+' ('+r.pct+'%) - '+(r.pass?'PASSED':'FAILED')+' - Pass mark '+(r.passMark||70)+'%';
+    pdf.splitTextToSize(metaLine,maxW).forEach(function(l){pdf.text(l,margin,y);y+=5;});
+    pdf.text('Verification ID: '+r.vid,margin,y);y+=8;
+    pdf.setDrawColor(221,228,225);pdf.line(margin,y,pageW-margin,y);y+=8;
+    (r.qs||[]).forEach(function(q,idx){
+      var ok=q.a===q.c;
+      ensureSpace(14);
+      pdf.setFont('helvetica','bold');pdf.setFontSize(11);pdf.setTextColor(28,36,34);
+      pdf.splitTextToSize((idx+1)+'. '+q.q,maxW).forEach(function(l){ensureSpace(6);pdf.text(l,margin,y);y+=6;});
+      if(q.sec){pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(140,148,143);ensureSpace(5);pdf.text(String(q.sec).toUpperCase(),margin,y);y+=5;}
+      q.opts.forEach(function(o,oi){
+        var isCorrect=oi===q.c,isYourWrong=oi===q.a&&!ok;
+        var prefix=isCorrect?'+ ':(isYourWrong?'x ':'  ');
+        var suffix=isCorrect?'  (correct answer)':(isYourWrong?'  (your answer)':'');
+        var color=isCorrect?[17,107,51]:(isYourWrong?[192,57,43]:[95,107,103]);
+        pdf.setFont('helvetica',(isCorrect||isYourWrong)?'bold':'normal');pdf.setFontSize(10);pdf.setTextColor(color[0],color[1],color[2]);
+        pdf.splitTextToSize(prefix+String.fromCharCode(65+oi)+'. '+o+suffix,maxW-4).forEach(function(l){ensureSpace(5.5);pdf.text(l,margin+4,y);y+=5.5;});
+      });
+      if(q.a<0){pdf.setFont('helvetica','italic');pdf.setFontSize(9);pdf.setTextColor(140,148,143);ensureSpace(5);pdf.text('Not answered in time.',margin+4,y);y+=5;}
+      if(q.ex){
+        pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(95,107,103);
+        pdf.splitTextToSize('Note: '+q.ex,maxW-4).forEach(function(l){ensureSpace(5);pdf.text(l,margin+4,y);y+=5;});
+      }
+      y+=4;
+    });
+    addFooter();
+    pdf.save('Exam_Review_'+r.vid+'.pdf');
+  }
+  if(window.jspdf){make();return;}
+  var s=el('script',{src:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'});
+  s.onload=make;
+  s.onerror=function(){toast('Could not load the PDF library — check your internet connection and try again.');};
+  document.head.appendChild(s);
+}
 function certPdf(cv,r){
   function make(){
     var pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
@@ -1084,9 +1718,12 @@ function certPdf(cv,r){
 
 load();
 document.getElementById('admbtn').addEventListener('click',admToggle);
+document.getElementById('namebtn').addEventListener('click',function(){promptForName(false);});
 document.getElementById('brandhome').addEventListener('click',vDash);
 refreshAdm();
+refreshNameBtn();
 vDash();
+if(!S.userName)promptForName(true);
 </script>
 </body>
 </html>
